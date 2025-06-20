@@ -55,11 +55,11 @@
             <div class="flex-shrink-0">
                 <!-- Top Info Bar -->
                 <div class="flex items-center justify-between text-sm">
-                    <div class="flex items-center space-x-2">
-                        <img src="https://img.icons8.com/plasticine/100/diamond.png" alt="diamond" class="w-8 h-8">
-                        <div>
-                            <div id="player-name-display" class="font-bold text-lg text-teal-400">Player</div>
-                            <div id="diamond-display-top" class="font-bold text-lg">0</div>
+                    <div class="text-left">
+                        <div id="player-name-display" class="font-bold text-lg text-teal-400">Player</div>
+                        <div class="flex items-center space-x-1">
+                           <img src="https://img.icons8.com/plasticine/100/diamond.png" alt="diamond" class="w-6 h-6">
+                           <div id="diamond-display-top" class="font-bold text-lg">0</div>
                         </div>
                     </div>
                     <div class="flex justify-center">
@@ -159,7 +159,7 @@
      <div id="referral-success-modal" class="hidden fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center p-4 z-50 opacity-0 transform scale-95">
         <div class="bg-telegram-secondary rounded-2xl shadow-2xl p-8 w-full max-w-sm text-center relative overflow-hidden border-2 border-green-400">
              <h2 class="text-3xl font-bold text-green-400 mb-2">Success!</h2>
-             <p class="text-lg text-white mb-6">You've received a 20,000 Coin bonus!</p>
+             <p id="referral-bonus-text" class="text-lg text-white mb-6">You've received a bonus!</p>
              <button id="close-referral-success-btn" class="bg-green-600 hover:bg-green-700 px-6 py-2 rounded-lg font-bold transition w-full">Great!</button>
         </div>
     </div>
@@ -171,6 +171,7 @@
             <p class="text-gray-300 mb-6">Let's get you started.</p>
             <div class="space-y-4">
                  <input type="text" id="player-name-input" placeholder="Enter your name" class="w-full bg-gray-700 text-white p-3 rounded-lg text-center focus:outline-none focus:ring-2 focus:ring-yellow-500">
+                 <input type="text" id="player-username-input" placeholder="Create a username (letters & numbers only)" class="w-full bg-gray-700 text-white p-3 rounded-lg text-center focus:outline-none focus:ring-2 focus:ring-yellow-500">
                  <input type="number" id="player-age-input" placeholder="Enter your age" class="w-full bg-gray-700 text-white p-3 rounded-lg text-center focus:outline-none focus:ring-2 focus:ring-yellow-500">
                  <button id="start-game-btn" class="w-full bg-green-600 hover:bg-green-700 p-3 rounded-lg font-bold text-lg transition">Start Tapping</button>
             </div>
@@ -202,7 +203,7 @@
                     </div>
                     <p id="referral-error" class="text-red-500 text-sm mt-2 text-center h-4"></p>
                 </div>
-                <button class="w-full bg-blue-500 p-4 rounded-lg text-lg font-bold cursor-not-allowed opacity-50">Invite Friends (Coming Soon)</button>
+                 <div id="invite-code-display" class="w-full bg-blue-500 p-4 rounded-lg text-lg font-bold text-center">Your Invite Code: TapTap(...)</div>
             </div>
         </div>
     </div>
@@ -273,6 +274,7 @@
         // Modal Elements
         const registrationModal = document.getElementById('registration-modal');
         const playerNameInput = document.getElementById('player-name-input');
+        const playerUsernameInput = document.getElementById('player-username-input');
         const playerAgeInput = document.getElementById('player-age-input');
         const startGameBtn = document.getElementById('start-game-btn');
         const regError = document.getElementById('reg-error');
@@ -310,15 +312,18 @@
         const referralSuccessModal = document.getElementById('referral-success-modal');
         const closeReferralSuccessBtn = document.getElementById('close-referral-success-btn');
         const referralSection = document.getElementById('referral-section');
+        const referralBonusText = document.getElementById('referral-bonus-text');
+        const inviteCodeDisplay = document.getElementById('invite-code-display');
 
         // --- Game State Variables ---
         let gameState = {
-            playerName: null, playerAge: null,
+            playerName: null, playerUsername: null, playerAge: null,
             coins: 0, diamonds: 0, profitPerHour: 0, energy: 1000, maxEnergy: 1000,
             coinsPerTap: 1, tapUpgradeCost: 100, boostEnergyCost: 200, currentLeagueIndex: 0,
             markets: [], lastVisit: Date.now(), energyRegenRate: 1, energyRefillCost: 500,
             maxOfflineTime: 3 * 60 * 60 * 1000, offlineUpgradesPurchased: [],
-            referralClaimed: false
+            claimedReferralCodes: [],
+            claimedInviteCode: false
         };
 
         // --- Configs ---
@@ -327,6 +332,7 @@
 
         const cityNames = ["Tokyo", "London", "New York", "Paris", "Singapore", "Dubai", "Hong Kong", "Sydney", "Zurich", "Los Angeles", "Shanghai", "Toronto", "Seoul", "Berlin", "Amsterdam", "Mumbai", "Moscow", "Beijing", "Madrid", "Rome", "Bangkok", "Istanbul", "Jakarta", "Cairo", "Buenos Aires", "Mexico City", "São Paulo", "Lagos", "Karachi", "Dhaka", "Manila", "Rio de Janeiro", "Chicago", "San Francisco", "Washington D.C.", "Boston", "Miami", "Houston", "Dallas", "Atlanta", "Philadelphia", "Phoenix", "Seattle", "Denver", "Vancouver", "Montreal", "Lima", "Bogotá", "Santiago", "Caracas", "Havana", "Kingston", "Lisbon", "Dublin", "Brussels", "Vienna", "Prague", "Warsaw", "Budapest", "Athens", "Helsinki", "Oslo", "Stockholm", "Copenhagen", "Riyadh", "Doha", "Abu Dhabi", "Kuwait City", "Tel Aviv", "Ankara", "Nairobi", "Johannesburg", "Cape Town", "Accra", "Dakar", "Casablanca", "Algiers", "Tunis", "Kuala Lumpur", "Ho Chi Minh City", "Hanoi", "Phnom Penh", "Yangon", "Taipei", "Kolkata", "Chennai", "Bangalore", "Hyderabad", "Pune", "Ahmedabad", "Surat", "Jaipur", "Cebu City", "Perth", "Melbourne", "Auckland", "Wellington", "Christchurch", "Honolulu", "Chittagong", "Satkania"];
         const specialItemNames = [ "iPhone", "Samsung Galaxy", "Google Pixel", "OnePlus", "Xiaomi", "Huawei", "Tesla", "Ferrari", "Lamborghini", "Bugatti", "Rolls-Royce", "Porsche", "Ducati", "Harley-Davidson", "Kawasaki Ninja", "BMW S1000RR", "Yamaha R1", "Apple", "Google", "Amazon", "Microsoft", "Meta", "Nike", "Adidas", "Gucci", "Louis Vuitton" ];
+        const premiumItemNames = [ "Web Agency", "Crypto Farm", "AI Startup", "Luxury Hotel", "Private Jet", "Yacht", "Skyscraper", "Movie Studio", "Record Label", "Video Game Company", "Fashion Brand", "Restaurant Chain", "Supercar Fleet", "Art Gallery", "Vineyard", "Hedge Fund", "Venture Capital Firm", "Private Island", "Space Tourism Ticket", "Robot Butler", "Hologram Projector", "Flying Car", "Exosuit", "Cybernetic Pet", "Personal Satellite", "VR World", "Gene-Editing Lab", "Quantum Computer", "Asteroid Mine", "Moon Base", "Dyson Sphere Fragment", "Interstellar Probe", "Starship", "Teleportation Device", "Time Machine", "Sentient AI", "Galactic Franchise", "Alien Artifact", "Parallel Universe Portal", "Immortality Serum", "Reality Glitch", "4th Wall Awareness", "Plot Armor", "Narrative Control", "The Multiverse" ];
         const shopItems = [ { id: 1, cost: 1000, reward: 10 }, { id: 2, cost: 10000, reward: 100 }, { id: 3, cost: 100000, reward: 500 }, { id: 4, cost: 1000000, reward: 1000 } ];
         const offlineShopItems = [
             { id: 1, cost: 1000, duration: 10 * 60 * 1000, label: "+10 Min" },
@@ -334,6 +340,15 @@
             { id: 3, cost: 10000, duration: 130 * 60 * 1000, label: "+2h 10m" },
             { id: 4, cost: 20000, duration: 250 * 60 * 1000, label: "+4h 10m" },
         ];
+        const referralCodes = {
+            "TapTap121": 20000, "TapTap1413": 15000, "TapTap1715": 25000,
+            "TapTap1433": 20000, "TapTap2523": 15000, "TapTap2345": 30000,
+            "TapTap2357": 20000, "TapTap7809": 30000, "TapTap2435": 20000,
+            "TapTap0976": 25000, "TapTap5934": 30000, "TapTap0543": 25000,
+            "TapTap5679": 20000, "TapTap1985": 25000, "TapTap2823": 15000,
+            "TapTap0128": 25000, "TapTap8394": 30000, "TapTap2398": 20000
+        };
+
         
         function generateLeagues() {
             let threshold = 0;
@@ -373,7 +388,7 @@
         function formatNumber(num) { if (num < 1000) return num.toLocaleString(); if (num < 1000000) return (num / 1000).toFixed(1).replace(/\.0$/, '') + 'K'; if (num < 1000000000) return (num / 1000000).toFixed(2).replace(/\.00$/, '') + 'M'; return (num / 1000000000).toFixed(3).replace(/\.000$/, '') + 'B'; }
         function formatDuration(ms) { const h = Math.floor(ms / 3600000); const m = Math.floor((ms % 3600000) / 60000); return `${h}h ${m}m`; }
         function updateDisplay() {
-            playerNameDisplay.textContent = gameState.playerName || 'Player';
+            playerNameDisplay.textContent = gameState.playerUsername || 'Player';
             scoreDisplayMain.textContent = Math.floor(gameState.coins).toLocaleString();
             diamondDisplayTop.textContent = gameState.diamonds.toLocaleString();
             diamondBalanceShop.textContent = gameState.diamonds.toLocaleString();
@@ -385,6 +400,9 @@
             boostEnergyCostSpan.textContent = formatNumber(gameState.boostEnergyCost);
             energyRefillCostSpan.textContent = formatNumber(gameState.energyRefillCost);
             currentOfflineTimeSpan.textContent = formatDuration(gameState.maxOfflineTime);
+            if(gameState.playerUsername) {
+                inviteCodeDisplay.textContent = `Your Invite Code: TapTap(${gameState.playerUsername})`;
+            }
         }
         function showFloatingText(event) { const text = document.createElement('div'); text.textContent = `+${gameState.coinsPerTap}`; text.className = 'floating-text'; const rect = clickArea.getBoundingClientRect(); const x = (event.clientX || event.touches[0].clientX) - rect.left; const y = (event.clientY || event.touches[0].clientY) - rect.top; text.style.left = `${x}px`; text.style.top = `${y}px`; clickArea.appendChild(text); setTimeout(() => text.remove(), 1000); }
         function handleHamsterClick(event) { if (gameState.energy >= gameState.coinsPerTap) { gameState.coins += gameState.coinsPerTap; gameState.energy -= gameState.coinsPerTap; showFloatingText(event); checkLeagueUp(); updateDisplay(); } }
@@ -405,7 +423,7 @@
         
             if(hasRankedUp){
                 newRankNameSpan.textContent = newLeague.name;
-                rankUpModal.classList.remove('hidden', 'opacity-0', 'scale-95');
+                rankUpModal.classList.remove('hidden');
                  setTimeout(() => {
                     rankUpModal.classList.remove('opacity-0', 'scale-95');
                 }, 10);
@@ -416,9 +434,9 @@
         function upgradeTap() { if (gameState.coins >= gameState.tapUpgradeCost) { gameState.coins -= gameState.tapUpgradeCost; gameState.coinsPerTap++; gameState.tapUpgradeCost = Math.floor(gameState.tapUpgradeCost * 1.5); updateDisplay(); } }
         function boostEnergy() { if (gameState.coins >= gameState.boostEnergyCost) { gameState.coins -= gameState.boostEnergyCost; gameState.maxEnergy += 500; gameState.energy = gameState.maxEnergy; gameState.boostEnergyCost = Math.floor(gameState.boostEnergyCost * 1.8); updateDisplay(); } }
         function upgradeEnergyRefill() { if (gameState.coins >= gameState.energyRefillCost) { gameState.coins -= gameState.energyRefillCost; gameState.energyRegenRate++; gameState.energyRefillCost = Math.floor(gameState.energyRefillCost * 2); updateDisplay(); } }
-        function initializeMarkets() { const shuffledCities = [...cityNames].sort(() => 0.5 - Math.random()); for (let i = 0; i < 102; i++) { gameState.markets.push({ id: i, name: shuffledCities[i], cost: Math.floor(Math.random() * 4001) + 1000, profitIncrease: Math.floor(Math.random() * 901) + 100, unlocked: false, type: 'city' }); } }
+        function initializeMarkets() { const shuffledCities = [...cityNames].sort(() => 0.5 - Math.random()); for (let i = 0; i < 102; i++) { gameState.markets.push({ id: i, name: shuffledCities[i], cost: Math.floor(Math.random() * 4001) + 1000, profitIncrease: Math.floor(Math.random() * 901) + 100, unlocked: false, type: 'city' }); } const shuffledPremium = [...premiumItemNames].sort(() => 0.5 - Math.random()); for (let i = 0; i < 48; i++) { gameState.markets.push({ id: `premium_${i}`, name: shuffledPremium[i], cost: Math.floor(Math.random() * 40001) + 10000, profitIncrease: Math.floor(Math.random() * 7001) + 1000, unlocked: false, type: 'premium' }); } }
         function addNewSpecialMarket() { const newId = 'special_' + gameState.markets.length; const randomName = specialItemNames[Math.floor(Math.random() * specialItemNames.length)]; const newMarket = { id: newId, name: randomName, cost: Math.floor(Math.random() * 900001) + 100000, profitIncrease: Math.floor(Math.random() * 90001) + 10000, unlocked: false, type: 'special' }; gameState.markets.push(newMarket); }
-        function renderMarkets() { marketsGrid.innerHTML = ''; const sortedMarkets = [...gameState.markets].sort((a, b) => { if (a.type === 'special' && b.type !== 'special') return 1; if (a.type !== 'special' && b.type === 'special') return -1; return 0; }); sortedMarkets.forEach(market => { const button = document.createElement('button'); button.className = 'p-3 rounded-lg text-center font-bold transition text-sm flex flex-col justify-between h-24'; if (market.unlocked) { button.classList.add('bg-green-800', 'cursor-not-allowed'); button.innerHTML = `<span>${market.name}</span><span class="text-xs font-normal mt-1">Purchased</span><span class="text-xs text-green-300 font-bold">+${formatNumber(market.profitIncrease)}/hr</span>`; button.disabled = true; } else { const canAfford = gameState.coins >= market.cost; if (market.type === 'special') { button.classList.add(...(canAfford ? ['bg-gradient-to-r', 'from-yellow-400', 'to-amber-500', 'text-black', 'hover:from-yellow-500'] : ['bg-gray-800', 'cursor-not-allowed', 'opacity-60'])); } else { button.classList.add(...(canAfford ? ['bg-purple-600', 'hover:bg-purple-700'] : ['bg-gray-700', 'cursor-not-allowed', 'opacity-60'])); } button.innerHTML = `<span>${market.name}</span><span class="text-xs font-normal mt-1 text-yellow-300">Cost: ${formatNumber(market.cost)}</span><span class="text-xs text-green-300 font-bold">+${formatNumber(market.profitIncrease)}/hr</span>`; button.disabled = !canAfford; button.onclick = () => purchaseMarket(market.id); } marketsGrid.appendChild(button); }); }
+        function renderMarkets() { marketsGrid.innerHTML = ''; const sortedMarkets = [...gameState.markets].sort((a, b) => { if (a.type === 'special' && b.type !== 'special') return 1; if (a.type !== 'special' && b.type === 'special') return -1; return 0; }); sortedMarkets.forEach(market => { const button = document.createElement('button'); button.className = 'p-3 rounded-lg text-center font-bold transition text-sm flex flex-col justify-between h-24'; if (market.unlocked) { button.classList.add('bg-green-800', 'cursor-not-allowed'); button.innerHTML = `<span>${market.name}</span><span class="text-xs font-normal mt-1">Purchased</span><span class="text-xs text-green-300 font-bold">+${formatNumber(market.profitIncrease)}/hr</span>`; button.disabled = true; } else { const canAfford = gameState.coins >= market.cost; if (market.type === 'special') { button.classList.add(...(canAfford ? ['bg-gradient-to-r', 'from-yellow-400', 'to-amber-500', 'text-black', 'hover:from-yellow-500'] : ['bg-gray-800', 'cursor-not-allowed', 'opacity-60'])); } else if (market.type === 'premium') { button.classList.add(...(canAfford ? ['bg-gradient-to-r', 'from-blue-400', 'to-cyan-500', 'text-white', 'hover:from-blue-500'] : ['bg-gray-800', 'cursor-not-allowed', 'opacity-60'])); } else { button.classList.add(...(canAfford ? ['bg-purple-600', 'hover:bg-purple-700'] : ['bg-gray-700', 'cursor-not-allowed', 'opacity-60'])); } button.innerHTML = `<span>${market.name}</span><span class="text-xs font-normal mt-1 text-yellow-300">Cost: ${formatNumber(market.cost)}</span><span class="text-xs text-green-300 font-bold">+${formatNumber(market.profitIncrease)}/hr</span>`; button.disabled = !canAfford; button.onclick = () => purchaseMarket(market.id); } marketsGrid.appendChild(button); }); }
         function purchaseMarket(id) { const market = gameState.markets.find(m => m.id === id); if (market && !market.unlocked && gameState.coins >= market.cost) { gameState.coins -= market.cost; gameState.profitPerHour += market.profitIncrease; market.unlocked = true; if (market.type === 'city') { addNewSpecialMarket(); } updateDisplay(); renderMarkets(); } }
         function renderShop() { shopGrid.innerHTML = ''; shopItems.forEach(item => { const button = document.createElement('button'); button.className = 'p-4 rounded-lg text-center font-bold transition flex flex-col items-center justify-center'; const canAfford = gameState.coins >= item.cost; button.classList.add(...(canAfford ? ['bg-orange-600', 'hover:bg-orange-700'] : ['bg-gray-700', 'cursor-not-allowed', 'opacity-60'])); button.innerHTML = `<div class="text-lg">Claim ${item.reward.toLocaleString()} Diamonds</div><div class="text-sm font-normal text-yellow-300">Cost: ${formatNumber(item.cost)} Coins</div>`; button.disabled = !canAfford; button.onclick = () => claimDiamonds(item.cost, item.reward); shopGrid.appendChild(button); }); }
         function claimDiamonds(cost, reward) { if (gameState.coins >= cost) { gameState.coins -= cost; gameState.diamonds += reward; updateDisplay(); renderShop(); } }
@@ -426,7 +444,7 @@
         function purchaseOfflineTime(id, cost, duration) { if (gameState.diamonds >= cost && !gameState.offlineUpgradesPurchased.includes(id)) { gameState.diamonds -= cost; gameState.maxOfflineTime += duration; gameState.offlineUpgradesPurchased.push(id); updateDisplay(); renderOfflineShop(); } }
         function populateLeagues() { leagueList.innerHTML = ''; leagues.forEach((league, index) => { const li = document.createElement('li'); li.className = 'p-3 rounded-lg flex justify-between items-center text-md font-bold transition-all duration-300'; const isCurrent = index === gameState.currentLeagueIndex; const isUnlocked = index <= gameState.currentLeagueIndex; if (isUnlocked) li.classList.add(league.rankClass); else li.classList.add('rank-locked'); if (isCurrent) li.classList.add('rank-current'); li.innerHTML = `<span>${league.name}</span><span class="text-xs font-normal">${isUnlocked ? 'Coin > ' + formatNumber(league.threshold) : '🔒 Coin > ' + formatNumber(league.threshold)}</span>`; leagueList.appendChild(li); }); }
         function saveGame() { gameState.lastVisit = Date.now(); localStorage.setItem('tapTapGameState', JSON.stringify(gameState)); }
-        function loadGame() { const savedState = localStorage.getItem('tapTapGameState'); if (savedState) { const loadedState = JSON.parse(savedState); if (!loadedState.playerName) { return false; } const timeOffline = Date.now() - loadedState.lastVisit; const effectiveOfflineTime = Math.min(timeOffline, loadedState.maxOfflineTime || (3 * 60 * 60 * 1000)); const offlineEarnings = (loadedState.profitPerHour / 3600) * (effectiveOfflineTime / 1000); if (offlineEarnings > 1) { loadedState.coins += offlineEarnings; offlinePlayerName.textContent = loadedState.playerName; offlineEarningsDisplay.textContent = formatNumber(Math.floor(offlineEarnings)); offlineEarningsModal.classList.remove('hidden'); setTimeout(() => { offlineEarningsModal.classList.remove('opacity-0', 'scale-95'); }, 10); } gameState = loadedState; if (!gameState.markets || gameState.markets.length === 0) { initializeMarkets(); } else { gameState.markets.forEach(m => { if(!m.type) m.type = typeof m.id === 'number' ? 'city' : 'special'; }); } if (!gameState.offlineUpgradesPurchased) gameState.offlineUpgradesPurchased = []; if(!gameState.maxOfflineTime) gameState.maxOfflineTime = 3*60*60*1000; return true; } return false; }
+        function loadGame() { const savedState = localStorage.getItem('tapTapGameState'); if (savedState) { const loadedState = JSON.parse(savedState); if (!loadedState.playerName || !loadedState.playerUsername) { return false; } const timeOffline = Date.now() - loadedState.lastVisit; const effectiveOfflineTime = Math.min(timeOffline, loadedState.maxOfflineTime || (3 * 60 * 60 * 1000)); const offlineEarnings = (loadedState.profitPerHour / 3600) * (effectiveOfflineTime / 1000); if (offlineEarnings > 1) { loadedState.coins += offlineEarnings; offlinePlayerName.textContent = loadedState.playerUsername; offlineEarningsDisplay.textContent = formatNumber(Math.floor(offlineEarnings)); offlineEarningsModal.classList.remove('hidden'); setTimeout(() => { offlineEarningsModal.classList.remove('opacity-0', 'scale-95'); }, 10); } gameState = loadedState; if (!gameState.markets || gameState.markets.length === 0) { initializeMarkets(); } else { gameState.markets.forEach(m => { if(!m.type) m.type = typeof m.id === 'number' ? 'city' : 'special'; }); } if (!gameState.offlineUpgradesPurchased) gameState.offlineUpgradesPurchased = []; if(!gameState.maxOfflineTime) gameState.maxOfflineTime = 3*60*60*1000; if(!gameState.claimedReferralCodes) gameState.claimedReferralCodes = []; if(typeof gameState.claimedInviteCode === 'undefined') gameState.claimedInviteCode = false; return true; } return false; }
 
         // --- Event Listeners ---
         hamsterButton.addEventListener('click', handleHamsterClick);
@@ -452,19 +470,51 @@
         closeOfflineBtn.addEventListener('click', () => { offlineEarningsModal.classList.add('opacity-0', 'scale-95'); setTimeout(() => { offlineEarningsModal.classList.add('hidden'); }, 500) });
         
         submitReferralBtn.addEventListener('click', () => {
+            const code = referralCodeInput.value.trim();
             referralError.textContent = '';
-            if(gameState.referralClaimed) {
-                referralError.textContent = 'Bonus already claimed.';
+            
+            if (gameState.claimedReferralCodes.includes(code)) {
+                referralError.textContent = 'This code has already been claimed.';
                 return;
             }
-            if(referralCodeInput.value === 'TapTap121') {
-                gameState.coins += 20000;
-                gameState.referralClaimed = true;
+            
+            let bonus = referralCodes[code];
+            let isUserInvite = false;
+            
+            if(!bonus) {
+                 const match = code.match(/^TapTap\((.+)\)$/);
+                 if(match && match[1]) {
+                     const invitedByUsername = match[1];
+                     const allUsernames = JSON.parse(localStorage.getItem('tapTapAllUsernames')) || [];
+                     if(allUsernames.includes(invitedByUsername) && invitedByUsername !== gameState.playerUsername) {
+                        if(gameState.claimedInviteCode) {
+                            referralError.textContent = 'You have already claimed an invite bonus.';
+                            return;
+                        }
+                        bonus = 50000;
+                        isUserInvite = true;
+                     }
+                 }
+            }
+
+            if (bonus) {
+                gameState.coins += bonus;
+                gameState.claimedReferralCodes.push(code);
+                if(isUserInvite) {
+                    gameState.claimedInviteCode = true;
+                    referralSection.innerHTML = '<p class="text-green-400 text-center">Invite bonus claimed!</p>';
+                }
+
                 updateDisplay();
                 saveGame();
-                referralSection.innerHTML = '<p class="text-green-400 text-center">Bonus Claimed!</p>';
+                referralCodeInput.value = '';
                 friendsModal.classList.add('hidden');
-                referralSuccessModal.classList.remove('hidden', 'opacity-0', 'scale-95');
+                
+                referralBonusText.textContent = `You've received a ${formatNumber(bonus)} Coin bonus!`;
+                referralSuccessModal.classList.remove('hidden');
+                setTimeout(() => {
+                    referralSuccessModal.classList.remove('opacity-0', 'scale-95');
+                }, 10);
             } else {
                 referralError.textContent = 'Invalid code.';
             }
@@ -479,21 +529,26 @@
 
         startGameBtn.addEventListener('click', () => {
             const name = playerNameInput.value.trim();
+            const username = playerUsernameInput.value.trim();
             const age = playerAgeInput.value;
+            const usernameRegex = /^[a-zA-Z0-9]+$/;
             regError.textContent = '';
+            
+            const allUsernames = JSON.parse(localStorage.getItem('tapTapAllUsernames')) || [];
+            
+            if (name === '') { regError.textContent = 'Please enter your name.'; return; }
+            if (username === '') { regError.textContent = 'Please enter a username.'; return; }
+            if (!usernameRegex.test(username)) { regError.textContent = 'Username can only contain letters and numbers.'; return; }
+            if (allUsernames.includes(username)) { regError.textContent = 'Username is already taken.'; return; }
+            if (!age || isNaN(age) || age < 1) { regError.textContent = 'Please enter a valid age.'; return; }
 
-            if (name === '') {
-                regError.textContent = 'Please enter your name.';
-                return;
-            }
-            if (!age || isNaN(age) || age < 1) {
-                regError.textContent = 'Please enter a valid age.';
-                return;
-            }
+            allUsernames.push(username);
+            localStorage.setItem('tapTapAllUsernames', JSON.stringify(allUsernames));
 
             gameState.playerName = name;
+            gameState.playerUsername = username;
             gameState.playerAge = parseInt(age);
-            initializeMarkets(); // Initialize markets for a new player
+            initializeMarkets();
             saveGame();
             registrationModal.classList.add('hidden');
             checkLeagueUp();
@@ -520,8 +575,8 @@
             } else {
                 checkLeagueUp();
                 updateDisplay();
-                if(gameState.referralClaimed){
-                     referralSection.innerHTML = '<p class="text-green-400 text-center">Bonus Claimed!</p>';
+                if(gameState.claimedInviteCode){
+                     referralSection.innerHTML = '<p class="text-green-400 text-center">Invite bonus claimed!</p>';
                 }
             }
         };
