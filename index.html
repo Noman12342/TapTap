@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tap Tap</title>
+    
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts for a clean look -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        /* Custom styles and animations */
+        body {
+            font-family: 'Inter', sans-serif;
+            touch-action: manipulation;
+        }
+        #hamster-button:active { transform: scale(0.95); }
+        @keyframes float-up {
+            to { opacity: 0; transform: translateY(-50px) scale(1.5); }
+        }
+        .floating-text {
+            animation: float-up 1s ease-out forwards;
+            pointer-events: none; position: absolute; font-size: 2rem;
+            font-weight: 800; color: white; text-shadow: 0 0 10px rgba(255, 215, 0, 0.7);
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.2); border-left-color: #fff;
+            border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite;
+        }
+        .bg-telegram-dark { background-color: #17212b; }
+        .bg-telegram-secondary { background-color: #242f3d; }
+        .hamster-glow { filter: drop-shadow(0 0 25px rgba(253, 224, 71, 0.4)); }
+        .hamster-glow:hover { filter: drop-shadow(0 0 35px rgba(253, 224, 71, 0.6)); }
+        
+        /* Unique Ranking List Styles */
+        .rank-locked { background-color: #374151; color: #6b7280; cursor: not-allowed; }
+        .rank-current { transform: scale(1.05); box-shadow: 0 0 15px rgba(255, 223, 71, 0.9); border: 2px solid #facc15; }
+        #offline-earnings-modal, #offline-time-modal, #friends-modal, #rank-up-modal, #referral-success-modal { transition: opacity 0.5s, transform 0.5s; }
+
+        /* Dynamically generated rank styles will be added here by JS */
+    </style>
+</head>
+<body class="bg-telegram-dark text-white select-none">
+
+    <div id="game-container" class="w-full min-h-screen flex items-center justify-center sm:p-4">
+        <div class="w-full h-screen sm:h-auto sm:max-w-md bg-telegram-secondary sm:rounded-2xl shadow-2xl p-4 sm:p-6 flex flex-col">
+
+            <!-- Top Section -->
+            <div class="flex-shrink-0">
+                <!-- Top Info Bar -->
+                <div class="flex items-center justify-between text-sm">
+                    <div class="flex items-center space-x-2">
+                        <img src="https://img.icons8.com/plasticine/100/diamond.png" alt="diamond" class="w-8 h-8">
+                        <div>
+                            <div id="player-name-display" class="font-bold text-lg text-teal-400">Player</div>
+                            <div id="diamond-display-top" class="font-bold text-lg">0</div>
+                        </div>
+                    </div>
+                    <div class="flex justify-center">
+                        <div id="league-badge" class="px-3 py-1.5 rounded-full font-bold text-gray-900 transition-all duration-500 text-xs text-center bg-gray-400">Intern</div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-gray-400">Profit/hour</div>
+                        <div id="profit-display" class="font-bold text-yellow-400">+0</div>
+                    </div>
+                </div>
+
+                <!-- Main Score Display -->
+                <div class="text-center pt-4 pb-2">
+                    <div class="text-lg text-gray-400">Coin</div>
+                    <h1 id="score-display-main" class="text-5xl sm:text-6xl font-extrabold">0</h1>
+                </div>
+            </div>
+
+            <!-- Middle Section (Coin) -->
+            <div id="click-area" class="flex justify-center items-center flex-grow">
+                <button id="hamster-button" class="transition duration-100 ease-in-out w-48 h-48 sm:w-56 sm:h-56">
+                    <div class="relative hamster-glow w-full h-full">
+                        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" class="w-full h-full">
+                            <defs>
+                                <radialGradient id="grad1" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
+                                    <stop offset="0%" style="stop-color:rgb(255,255,204);stop-opacity:1" />
+                                    <stop offset="100%" style="stop-color:rgb(255,215,0);stop-opacity:1" />
+                                </radialGradient>
+                            </defs>
+                            <circle cx="50" cy="50" r="48" fill="url(#grad1)" stroke="#B8860B" stroke-width="4"/>
+                            <text x="50" y="65" font-family="'Inter', sans-serif" font-size="40" font-weight="800" text-anchor="middle" fill="#8B4513">T</text>
+                        </svg>
+                    </div>
+                </button>
+            </div>
+
+            <!-- Bottom Section (Controls) -->
+            <div class="flex-shrink-0 space-y-4">
+                <div class="space-y-2">
+                    <div class="flex justify-between text-lg font-bold">
+                        <span>⚡️ Energy (<span id="energy-regen-rate">1</span>/s)</span>
+                        <span id="energy-display">1000/1000</span>
+                    </div>
+                    <div class="w-full bg-gray-700 rounded-full h-4">
+                        <div id="energy-bar" class="bg-yellow-400 h-4 rounded-full transition-all duration-300" style="width: 100%;"></div>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-2 pt-2 text-center">
+                    <button id="upgrade-tap-btn" class="bg-blue-600 hover:bg-blue-700 p-3 rounded-lg font-bold transition flex flex-col justify-center">
+                        <div class="text-sm">Boost Tap</div>
+                        <div class="text-xs font-normal">Cost: <span id="tap-upgrade-cost">100</span></div>
+                    </button>
+                    <button id="boost-energy-btn" class="bg-yellow-500 hover:bg-yellow-600 p-3 rounded-lg font-bold transition flex flex-col justify-center">
+                        <div class="text-sm">⚡️ Boost Energy</div>
+                        <div class="text-xs font-normal">Cost: <span id="boost-energy-cost">200</span></div>
+                    </button>
+                    <button id="energy-refill-btn" class="bg-cyan-500 hover:bg-cyan-600 p-3 rounded-lg font-bold transition flex flex-col justify-center">
+                        <div class="text-sm">Energy Refill</div>
+                        <div class="text-xs font-normal">Cost: <span id="energy-refill-cost">500</span></div>
+                    </button>
+                    <button id="offline-time-btn" class="bg-indigo-600 hover:bg-indigo-700 p-3 rounded-lg font-bold transition flex flex-col justify-center">
+                        <div class="text-sm">🕒 Offline Time</div>
+                        <div class="text-xs font-normal">Extend</div>
+                    </button>
+                    <button id="markets-btn" class="bg-purple-600 hover:bg-purple-700 p-3 rounded-lg font-bold transition flex flex-col justify-center">
+                        <div class="text-sm">📈 Markets</div>
+                        <div class="text-xs font-normal">Boost Profit</div>
+                    </button>
+                     <button id="shop-btn" class="bg-orange-600 hover:bg-orange-700 p-3 rounded-lg font-bold transition flex flex-col justify-center">
+                        <div class="text-sm">🛒 Shop</div>
+                        <div class="text-xs font-normal">Exchange</div>
+                    </button>
+                    <button id="ranking-btn" class="bg-green-600 hover:bg-green-700 p-3 rounded-lg font-bold transition flex flex-col justify-center">
+                        <div class="text-sm">🏆 Ranking</div>
+                        <div class="text-xs font-normal">View Ranks</div>
+                    </button>
+                     <button id="friends-btn" class="bg-teal-600 hover:bg-teal-700 p-3 rounded-lg font-bold transition flex flex-col justify-center">
+                        <div class="text-sm">🧑‍🤝‍🧑 Friends</div>
+                        <div class="text-xs font-normal">Invite & Earn</div>
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    
+    <!-- Modals -->
+     <div id="rank-up-modal" class="hidden fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center p-4 z-50 opacity-0 transform scale-95">
+        <div class="bg-telegram-secondary rounded-2xl shadow-2xl p-8 w-full max-w-sm text-center relative overflow-hidden border-2 border-yellow-400">
+             <h2 class="text-4xl font-bold text-yellow-400 mb-2">Congratulations!</h2>
+             <p class="text-lg text-gray-300 mb-4">You have been promoted to</p>
+             <p id="new-rank-name" class="text-3xl font-extrabold text-white mb-6 bg-gray-800/50 rounded-lg p-2"></p>
+             <button id="close-rank-up-btn" class="bg-blue-600 hover:bg-blue-700 px-6 py-2 rounded-lg font-bold transition w-full">Awesome!</button>
+        </div>
+    </div>
+    
+     <div id="referral-success-modal" class="hidden fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center p-4 z-50 opacity-0 transform scale-95">
+        <div class="bg-telegram-secondary rounded-2xl shadow-2xl p-8 w-full max-w-sm text-center relative overflow-hidden border-2 border-green-400">
+             <h2 class="text-3xl font-bold text-green-400 mb-2">Success!</h2>
+             <p class="text-lg text-white mb-6">You've received a 20,000 Coin bonus!</p>
+             <button id="close-referral-success-btn" class="bg-green-600 hover:bg-green-700 px-6 py-2 rounded-lg font-bold transition w-full">Great!</button>
+        </div>
+    </div>
+
+
+    <div id="registration-modal" class="hidden fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center p-4 z-50">
+        <div class="bg-telegram-secondary rounded-2xl shadow-2xl p-8 w-full max-w-sm text-center">
+            <h2 class="text-3xl font-bold text-yellow-400 mb-4">Welcome to Tap Tap!</h2>
+            <p class="text-gray-300 mb-6">Let's get you started.</p>
+            <div class="space-y-4">
+                 <input type="text" id="player-name-input" placeholder="Enter your name" class="w-full bg-gray-700 text-white p-3 rounded-lg text-center focus:outline-none focus:ring-2 focus:ring-yellow-500">
+                 <input type="number" id="player-age-input" placeholder="Enter your age" class="w-full bg-gray-700 text-white p-3 rounded-lg text-center focus:outline-none focus:ring-2 focus:ring-yellow-500">
+                 <button id="start-game-btn" class="w-full bg-green-600 hover:bg-green-700 p-3 rounded-lg font-bold text-lg transition">Start Tapping</button>
+            </div>
+            <p id="reg-error" class="text-red-500 text-sm mt-4 h-4"></p>
+        </div>
+    </div>
+    
+    <div id="offline-earnings-modal" class="hidden fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center p-4 z-50 opacity-0 transform scale-95">
+        <div class="bg-telegram-secondary rounded-2xl shadow-2xl p-6 w-full max-w-sm text-center">
+            <h2 class="text-2xl font-bold text-yellow-400 mb-2">Welcome Back, <span id="offline-player-name"></span>!</h2>
+            <p class="mb-4">While you were away, you earned:</p>
+            <p id="offline-earnings-display" class="text-4xl font-extrabold text-white mb-6">0</p>
+            <button id="close-offline-btn" class="bg-blue-600 hover:bg-blue-700 px-6 py-2 rounded-lg font-bold transition w-full">Claim</button>
+        </div>
+    </div>
+
+    <div id="friends-modal" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50">
+        <div class="bg-telegram-secondary rounded-2xl shadow-2xl p-6 w-full max-w-lg">
+             <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-bold text-teal-400">Friends & Bonuses</h2>
+                <button id="close-friends-btn" class="text-gray-400 hover:text-white text-3xl font-bold">&times;</button>
+            </div>
+            <div class="space-y-4">
+                 <div id="referral-section">
+                    <p class="text-center mb-2 text-gray-300">Enter a referral code for a bonus!</p>
+                    <div class="flex space-x-2">
+                        <input type="text" id="referral-code-input" placeholder="Referral Code" class="w-full bg-gray-800 text-white p-3 rounded-lg text-center focus:outline-none focus:ring-2 focus:ring-teal-500">
+                        <button id="submit-referral-btn" class="bg-teal-600 hover:bg-teal-700 px-6 py-2 rounded-lg font-bold">Submit</button>
+                    </div>
+                    <p id="referral-error" class="text-red-500 text-sm mt-2 text-center h-4"></p>
+                </div>
+                <button class="w-full bg-blue-500 p-4 rounded-lg text-lg font-bold cursor-not-allowed opacity-50">Invite Friends (Coming Soon)</button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="offline-time-modal" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50">
+        <div class="bg-telegram-secondary rounded-2xl shadow-2xl p-6 w-full max-w-lg">
+             <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-bold text-indigo-400">Extend Offline Time</h2>
+                <button id="close-offline-time-btn" class="text-gray-400 hover:text-white text-3xl font-bold">&times;</button>
+            </div>
+            <div class="text-center mb-4">
+                <p>Current Max Offline Time: <span id="current-offline-time" class="font-bold text-yellow-400">3h</span></p>
+            </div>
+            <div id="offline-time-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+        </div>
+    </div>
+
+    <div id="shop-modal" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50">
+        <div class="bg-telegram-secondary rounded-2xl shadow-2xl p-6 w-full max-w-lg">
+             <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-bold text-orange-400">Coin Exchange</h2>
+                <button id="close-shop-btn" class="text-gray-400 hover:text-white text-3xl font-bold">&times;</button>
+            </div>
+            <div class="text-center mb-4">
+                <p>Your Diamonds: <span id="diamond-balance-shop" class="font-bold text-yellow-400">0</span></p>
+            </div>
+            <div id="shop-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+        </div>
+    </div>
+    <div id="markets-modal" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50">
+        <div class="bg-telegram-secondary rounded-2xl shadow-2xl p-6 w-full max-w-lg">
+             <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-bold text-purple-400">Unlock Markets</h2>
+                <button id="close-markets-btn" class="text-gray-400 hover:text-white text-3xl font-bold">&times;</button>
+            </div>
+            <div id="markets-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 max-h-[60vh] overflow-y-auto"></div>
+        </div>
+    </div>
+    <div id="ranking-modal" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50">
+        <div class="bg-telegram-secondary rounded-2xl shadow-2xl p-6 w-full max-w-sm">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-bold text-yellow-400">Corporate Ranks</h2>
+                <button id="close-ranking-btn" class="text-gray-400 hover:text-white text-3xl font-bold">&times;</button>
+            </div>
+            <ul id="league-list" class="space-y-2 max-h-[60vh] overflow-y-auto pr-2"></ul>
+        </div>
+    </div>
+
+    <script>
+        // --- DOM Elements ---
+        const diamondDisplayTop = document.getElementById('diamond-display-top');
+        const scoreDisplayMain = document.getElementById('score-display-main');
+        const profitDisplay = document.getElementById('profit-display');
+        const hamsterButton = document.getElementById('hamster-button');
+        const clickArea = document.getElementById('click-area');
+        const energyDisplay = document.getElementById('energy-display');
+        const energyBar = document.getElementById('energy-bar');
+        const energyRegenRateSpan = document.getElementById('energy-regen-rate');
+        const leagueBadge = document.getElementById('league-badge');
+        const upgradeTapBtn = document.getElementById('upgrade-tap-btn');
+        const tapUpgradeCostSpan = document.getElementById('tap-upgrade-cost');
+        const boostEnergyBtn = document.getElementById('boost-energy-btn');
+        const boostEnergyCostSpan = document.getElementById('boost-energy-cost');
+        const energyRefillBtn = document.getElementById('energy-refill-btn');
+        const energyRefillCostSpan = document.getElementById('energy-refill-cost');
+        const playerNameDisplay = document.getElementById('player-name-display');
+        
+        // Modal Elements
+        const registrationModal = document.getElementById('registration-modal');
+        const playerNameInput = document.getElementById('player-name-input');
+        const playerAgeInput = document.getElementById('player-age-input');
+        const startGameBtn = document.getElementById('start-game-btn');
+        const regError = document.getElementById('reg-error');
+        const rankUpModal = document.getElementById('rank-up-modal');
+        const newRankNameSpan = document.getElementById('new-rank-name');
+        const closeRankUpBtn = document.getElementById('close-rank-up-btn');
+        const rankingBtn = document.getElementById('ranking-btn');
+        const rankingModal = document.getElementById('ranking-modal');
+        const closeRankingBtn = document.getElementById('close-ranking-btn');
+        const leagueList = document.getElementById('league-list');
+        const marketsBtn = document.getElementById('markets-btn');
+        const marketsModal = document.getElementById('markets-modal');
+        const closeMarketsBtn = document.getElementById('close-markets-btn');
+        const marketsGrid = document.getElementById('markets-grid');
+        const shopBtn = document.getElementById('shop-btn');
+        const shopModal = document.getElementById('shop-modal');
+        const closeShopBtn = document.getElementById('close-shop-btn');
+        const shopGrid = document.getElementById('shop-grid');
+        const diamondBalanceShop = document.getElementById('diamond-balance-shop');
+        const offlineEarningsModal = document.getElementById('offline-earnings-modal');
+        const offlinePlayerName = document.getElementById('offline-player-name');
+        const offlineEarningsDisplay = document.getElementById('offline-earnings-display');
+        const closeOfflineBtn = document.getElementById('close-offline-btn');
+        const offlineTimeBtn = document.getElementById('offline-time-btn');
+        const offlineTimeModal = document.getElementById('offline-time-modal');
+        const closeOfflineTimeBtn = document.getElementById('close-offline-time-btn');
+        const offlineTimeGrid = document.getElementById('offline-time-grid');
+        const currentOfflineTimeSpan = document.getElementById('current-offline-time');
+        const friendsBtn = document.getElementById('friends-btn');
+        const friendsModal = document.getElementById('friends-modal');
+        const closeFriendsBtn = document.getElementById('close-friends-btn');
+        const referralCodeInput = document.getElementById('referral-code-input');
+        const submitReferralBtn = document.getElementById('submit-referral-btn');
+        const referralError = document.getElementById('referral-error');
+        const referralSuccessModal = document.getElementById('referral-success-modal');
+        const closeReferralSuccessBtn = document.getElementById('close-referral-success-btn');
+        const referralSection = document.getElementById('referral-section');
+
+        // --- Game State Variables ---
+        let gameState = {
+            playerName: null, playerAge: null,
+            coins: 0, diamonds: 0, profitPerHour: 0, energy: 1000, maxEnergy: 1000,
+            coinsPerTap: 1, tapUpgradeCost: 100, boostEnergyCost: 200, currentLeagueIndex: 0,
+            markets: [], lastVisit: Date.now(), energyRegenRate: 1, energyRefillCost: 500,
+            maxOfflineTime: 3 * 60 * 60 * 1000, offlineUpgradesPurchased: [],
+            referralClaimed: false
+        };
+
+        // --- Configs ---
+        const rankNames = [ "Intern", "Trainee", "Apprentice", "Office Clerk", "Data Entry Clerk", "Administrative Assistant", "Technician", "Customer Service Representative", "Sales Representative", "Junior Associate", "Junior Analyst", "Junior Developer", "Assistant", "Coordinator", "Executive (Entry-Level)", "Support Staff", "Field Officer", "Technician II", "Associate", "Analyst", "Developer", "Engineer", "Specialist", "Consultant", "Team Lead", "Supervisor", "Senior Associate", "Senior Analyst", "Senior Developer", "Senior Engineer", "Project Manager", "Product Manager", "Program Manager", "Operations Manager", "HR Manager", "Finance Manager", "Marketing Manager", "Sales Manager", "Business Development Manager", "General Manager", "Senior Manager", "Director", "Regional Director", "Associate Director", "Senior Director", "Vice President (VP)", "Senior Vice President (SVP)", "Executive Vice President (EVP)", "Managing Director", "Country Manager", "Chief Operating Officer (COO)", "Chief Technology Officer (CTO)", "Chief Marketing Officer (CMO)", "Chief Financial Officer (CFO)", "Chief Human Resources Officer (CHRO)", "Chief Information Officer (CIO)", "Chief Strategy Officer (CSO)", "Chief Executive Officer (CEO)", "Co-Founder", "Founder / Owner" ];
+        const leagues = [];
+
+        const cityNames = ["Tokyo", "London", "New York", "Paris", "Singapore", "Dubai", "Hong Kong", "Sydney", "Zurich", "Los Angeles", "Shanghai", "Toronto", "Seoul", "Berlin", "Amsterdam", "Mumbai", "Moscow", "Beijing", "Madrid", "Rome", "Bangkok", "Istanbul", "Jakarta", "Cairo", "Buenos Aires", "Mexico City", "São Paulo", "Lagos", "Karachi", "Dhaka", "Manila", "Rio de Janeiro", "Chicago", "San Francisco", "Washington D.C.", "Boston", "Miami", "Houston", "Dallas", "Atlanta", "Philadelphia", "Phoenix", "Seattle", "Denver", "Vancouver", "Montreal", "Lima", "Bogotá", "Santiago", "Caracas", "Havana", "Kingston", "Lisbon", "Dublin", "Brussels", "Vienna", "Prague", "Warsaw", "Budapest", "Athens", "Helsinki", "Oslo", "Stockholm", "Copenhagen", "Riyadh", "Doha", "Abu Dhabi", "Kuwait City", "Tel Aviv", "Ankara", "Nairobi", "Johannesburg", "Cape Town", "Accra", "Dakar", "Casablanca", "Algiers", "Tunis", "Kuala Lumpur", "Ho Chi Minh City", "Hanoi", "Phnom Penh", "Yangon", "Taipei", "Kolkata", "Chennai", "Bangalore", "Hyderabad", "Pune", "Ahmedabad", "Surat", "Jaipur", "Cebu City", "Perth", "Melbourne", "Auckland", "Wellington", "Christchurch", "Honolulu", "Chittagong", "Satkania"];
+        const specialItemNames = [ "iPhone", "Samsung Galaxy", "Google Pixel", "OnePlus", "Xiaomi", "Huawei", "Tesla", "Ferrari", "Lamborghini", "Bugatti", "Rolls-Royce", "Porsche", "Ducati", "Harley-Davidson", "Kawasaki Ninja", "BMW S1000RR", "Yamaha R1", "Apple", "Google", "Amazon", "Microsoft", "Meta", "Nike", "Adidas", "Gucci", "Louis Vuitton" ];
+        const shopItems = [ { id: 1, cost: 1000, reward: 10 }, { id: 2, cost: 10000, reward: 100 }, { id: 3, cost: 100000, reward: 500 }, { id: 4, cost: 1000000, reward: 1000 } ];
+        const offlineShopItems = [
+            { id: 1, cost: 1000, duration: 10 * 60 * 1000, label: "+10 Min" },
+            { id: 2, cost: 5000, duration: 60 * 60 * 1000, label: "+1 Hour" },
+            { id: 3, cost: 10000, duration: 130 * 60 * 1000, label: "+2h 10m" },
+            { id: 4, cost: 20000, duration: 250 * 60 * 1000, label: "+4h 10m" },
+        ];
+        
+        function generateLeagues() {
+            let threshold = 0;
+            let profitBoost = 500;
+            const styleEl = document.createElement('style');
+            document.head.appendChild(styleEl);
+            const styleSheet = styleEl.sheet;
+
+            rankNames.forEach((name, index) => {
+                if (index > 0) {
+                    threshold = index < 10 ? threshold + (1000 * Math.pow(1.5, index)) : threshold * 1.8;
+                    profitBoost = index < 10 ? profitBoost + (500 * Math.pow(1.2, index)) : profitBoost * 1.5;
+                }
+                const rankClassName = `rank-${name.toLowerCase().replace(/[^a-z0-9]/g, '-')}`;
+                leagues.push({
+                    name: name,
+                    threshold: Math.floor(threshold),
+                    profitBoost: Math.floor(profitBoost),
+                    rankClass: rankClassName
+                });
+                
+                const color1 = `hsl(${Math.random() * 360}, 50%, 60%)`;
+                const color2 = `hsl(${Math.random() * 360}, 60%, 40%)`;
+                const textColor = (Math.random() > 0.5) ? 'white' : '#1f2937';
+                
+                if (styleSheet && styleSheet.cssRules) {
+                    try {
+                        styleSheet.insertRule(`.${rankClassName} { background-image: linear-gradient(135deg, ${color1}, ${color2}); color: ${textColor}; }`, styleSheet.cssRules.length);
+                    } catch (e) {
+                        console.error("Failed to insert CSS rule:", e);
+                    }
+                }
+            });
+        }
+        
+        // --- Game Logic ---
+        function formatNumber(num) { if (num < 1000) return num.toLocaleString(); if (num < 1000000) return (num / 1000).toFixed(1).replace(/\.0$/, '') + 'K'; if (num < 1000000000) return (num / 1000000).toFixed(2).replace(/\.00$/, '') + 'M'; return (num / 1000000000).toFixed(3).replace(/\.000$/, '') + 'B'; }
+        function formatDuration(ms) { const h = Math.floor(ms / 3600000); const m = Math.floor((ms % 3600000) / 60000); return `${h}h ${m}m`; }
+        function updateDisplay() {
+            playerNameDisplay.textContent = gameState.playerName || 'Player';
+            scoreDisplayMain.textContent = Math.floor(gameState.coins).toLocaleString();
+            diamondDisplayTop.textContent = gameState.diamonds.toLocaleString();
+            diamondBalanceShop.textContent = gameState.diamonds.toLocaleString();
+            profitDisplay.textContent = `+${formatNumber(gameState.profitPerHour)}`;
+            energyDisplay.textContent = `${gameState.energy}/${gameState.maxEnergy}`;
+            energyBar.style.width = `${(gameState.energy / gameState.maxEnergy) * 100}%`;
+            energyRegenRateSpan.textContent = gameState.energyRegenRate;
+            tapUpgradeCostSpan.textContent = formatNumber(gameState.tapUpgradeCost);
+            boostEnergyCostSpan.textContent = formatNumber(gameState.boostEnergyCost);
+            energyRefillCostSpan.textContent = formatNumber(gameState.energyRefillCost);
+            currentOfflineTimeSpan.textContent = formatDuration(gameState.maxOfflineTime);
+        }
+        function showFloatingText(event) { const text = document.createElement('div'); text.textContent = `+${gameState.coinsPerTap}`; text.className = 'floating-text'; const rect = clickArea.getBoundingClientRect(); const x = (event.clientX || event.touches[0].clientX) - rect.left; const y = (event.clientY || event.touches[0].clientY) - rect.top; text.style.left = `${x}px`; text.style.top = `${y}px`; clickArea.appendChild(text); setTimeout(() => text.remove(), 1000); }
+        function handleHamsterClick(event) { if (gameState.energy >= gameState.coinsPerTap) { gameState.coins += gameState.coinsPerTap; gameState.energy -= gameState.coinsPerTap; showFloatingText(event); checkLeagueUp(); updateDisplay(); } }
+        function checkLeagueUp() { 
+            let hasRankedUp = false;
+            let originalIndex = gameState.currentLeagueIndex;
+            while (gameState.currentLeagueIndex < leagues.length - 1 && gameState.coins >= leagues[gameState.currentLeagueIndex + 1].threshold) { 
+                gameState.currentLeagueIndex++; 
+                if (leagues[gameState.currentLeagueIndex].profitBoost) { 
+                    gameState.profitPerHour += leagues[gameState.currentLeagueIndex].profitBoost; 
+                }
+                hasRankedUp = true;
+            } 
+            
+            const newLeague = leagues[gameState.currentLeagueIndex]; 
+            leagueBadge.textContent = newLeague.name; 
+            leagueBadge.className = `px-3 py-1.5 rounded-full font-bold transition-all duration-500 text-xs text-center ${newLeague.rankClass}`; 
+        
+            if(hasRankedUp){
+                newRankNameSpan.textContent = newLeague.name;
+                rankUpModal.classList.remove('hidden', 'opacity-0', 'scale-95');
+                 setTimeout(() => {
+                    rankUpModal.classList.remove('opacity-0', 'scale-95');
+                }, 10);
+            }
+        }
+        function applyPassiveIncome() { gameState.coins += gameState.profitPerHour / 3600; checkLeagueUp(); updateDisplay(); }
+        function regenerateEnergy() { if (gameState.energy < gameState.maxEnergy) { gameState.energy = Math.min(gameState.maxEnergy, gameState.energy + gameState.energyRegenRate); updateDisplay(); } }
+        function upgradeTap() { if (gameState.coins >= gameState.tapUpgradeCost) { gameState.coins -= gameState.tapUpgradeCost; gameState.coinsPerTap++; gameState.tapUpgradeCost = Math.floor(gameState.tapUpgradeCost * 1.5); updateDisplay(); } }
+        function boostEnergy() { if (gameState.coins >= gameState.boostEnergyCost) { gameState.coins -= gameState.boostEnergyCost; gameState.maxEnergy += 500; gameState.energy = gameState.maxEnergy; gameState.boostEnergyCost = Math.floor(gameState.boostEnergyCost * 1.8); updateDisplay(); } }
+        function upgradeEnergyRefill() { if (gameState.coins >= gameState.energyRefillCost) { gameState.coins -= gameState.energyRefillCost; gameState.energyRegenRate++; gameState.energyRefillCost = Math.floor(gameState.energyRefillCost * 2); updateDisplay(); } }
+        function initializeMarkets() { const shuffledCities = [...cityNames].sort(() => 0.5 - Math.random()); for (let i = 0; i < 102; i++) { gameState.markets.push({ id: i, name: shuffledCities[i], cost: Math.floor(Math.random() * 4001) + 1000, profitIncrease: Math.floor(Math.random() * 901) + 100, unlocked: false, type: 'city' }); } }
+        function addNewSpecialMarket() { const newId = 'special_' + gameState.markets.length; const randomName = specialItemNames[Math.floor(Math.random() * specialItemNames.length)]; const newMarket = { id: newId, name: randomName, cost: Math.floor(Math.random() * 900001) + 100000, profitIncrease: Math.floor(Math.random() * 90001) + 10000, unlocked: false, type: 'special' }; gameState.markets.push(newMarket); }
+        function renderMarkets() { marketsGrid.innerHTML = ''; const sortedMarkets = [...gameState.markets].sort((a, b) => { if (a.type === 'special' && b.type !== 'special') return 1; if (a.type !== 'special' && b.type === 'special') return -1; return 0; }); sortedMarkets.forEach(market => { const button = document.createElement('button'); button.className = 'p-3 rounded-lg text-center font-bold transition text-sm flex flex-col justify-between h-24'; if (market.unlocked) { button.classList.add('bg-green-800', 'cursor-not-allowed'); button.innerHTML = `<span>${market.name}</span><span class="text-xs font-normal mt-1">Purchased</span><span class="text-xs text-green-300 font-bold">+${formatNumber(market.profitIncrease)}/hr</span>`; button.disabled = true; } else { const canAfford = gameState.coins >= market.cost; if (market.type === 'special') { button.classList.add(...(canAfford ? ['bg-gradient-to-r', 'from-yellow-400', 'to-amber-500', 'text-black', 'hover:from-yellow-500'] : ['bg-gray-800', 'cursor-not-allowed', 'opacity-60'])); } else { button.classList.add(...(canAfford ? ['bg-purple-600', 'hover:bg-purple-700'] : ['bg-gray-700', 'cursor-not-allowed', 'opacity-60'])); } button.innerHTML = `<span>${market.name}</span><span class="text-xs font-normal mt-1 text-yellow-300">Cost: ${formatNumber(market.cost)}</span><span class="text-xs text-green-300 font-bold">+${formatNumber(market.profitIncrease)}/hr</span>`; button.disabled = !canAfford; button.onclick = () => purchaseMarket(market.id); } marketsGrid.appendChild(button); }); }
+        function purchaseMarket(id) { const market = gameState.markets.find(m => m.id === id); if (market && !market.unlocked && gameState.coins >= market.cost) { gameState.coins -= market.cost; gameState.profitPerHour += market.profitIncrease; market.unlocked = true; if (market.type === 'city') { addNewSpecialMarket(); } updateDisplay(); renderMarkets(); } }
+        function renderShop() { shopGrid.innerHTML = ''; shopItems.forEach(item => { const button = document.createElement('button'); button.className = 'p-4 rounded-lg text-center font-bold transition flex flex-col items-center justify-center'; const canAfford = gameState.coins >= item.cost; button.classList.add(...(canAfford ? ['bg-orange-600', 'hover:bg-orange-700'] : ['bg-gray-700', 'cursor-not-allowed', 'opacity-60'])); button.innerHTML = `<div class="text-lg">Claim ${item.reward.toLocaleString()} Diamonds</div><div class="text-sm font-normal text-yellow-300">Cost: ${formatNumber(item.cost)} Coins</div>`; button.disabled = !canAfford; button.onclick = () => claimDiamonds(item.cost, item.reward); shopGrid.appendChild(button); }); }
+        function claimDiamonds(cost, reward) { if (gameState.coins >= cost) { gameState.coins -= cost; gameState.diamonds += reward; updateDisplay(); renderShop(); } }
+        function renderOfflineShop() { offlineTimeGrid.innerHTML = ''; offlineShopItems.forEach(item => { const button = document.createElement('button'); button.className = 'p-4 rounded-lg text-center font-bold transition flex flex-col items-center justify-center'; const isPurchased = gameState.offlineUpgradesPurchased.includes(item.id); const canAfford = gameState.diamonds >= item.cost; if (isPurchased) { button.classList.add('bg-green-800', 'cursor-not-allowed'); button.innerHTML = `<div class="text-lg">Purchased</div><div class="text-sm font-normal">+${item.label}</div>`; button.disabled = true; } else { button.classList.add(...(canAfford ? ['bg-indigo-600', 'hover:bg-indigo-700'] : ['bg-gray-700', 'cursor-not-allowed', 'opacity-60'])); button.innerHTML = `<div class="text-lg">${item.label}</div><div class="text-sm font-normal text-yellow-300">Cost: ${formatNumber(item.cost)} Diamonds</div>`; button.disabled = !canAfford; button.onclick = () => purchaseOfflineTime(item.id, item.cost, item.duration); } offlineTimeGrid.appendChild(button); }); }
+        function purchaseOfflineTime(id, cost, duration) { if (gameState.diamonds >= cost && !gameState.offlineUpgradesPurchased.includes(id)) { gameState.diamonds -= cost; gameState.maxOfflineTime += duration; gameState.offlineUpgradesPurchased.push(id); updateDisplay(); renderOfflineShop(); } }
+        function populateLeagues() { leagueList.innerHTML = ''; leagues.forEach((league, index) => { const li = document.createElement('li'); li.className = 'p-3 rounded-lg flex justify-between items-center text-md font-bold transition-all duration-300'; const isCurrent = index === gameState.currentLeagueIndex; const isUnlocked = index <= gameState.currentLeagueIndex; if (isUnlocked) li.classList.add(league.rankClass); else li.classList.add('rank-locked'); if (isCurrent) li.classList.add('rank-current'); li.innerHTML = `<span>${league.name}</span><span class="text-xs font-normal">${isUnlocked ? 'Coin > ' + formatNumber(league.threshold) : '🔒 Coin > ' + formatNumber(league.threshold)}</span>`; leagueList.appendChild(li); }); }
+        function saveGame() { gameState.lastVisit = Date.now(); localStorage.setItem('tapTapGameState', JSON.stringify(gameState)); }
+        function loadGame() { const savedState = localStorage.getItem('tapTapGameState'); if (savedState) { const loadedState = JSON.parse(savedState); if (!loadedState.playerName) { return false; } const timeOffline = Date.now() - loadedState.lastVisit; const effectiveOfflineTime = Math.min(timeOffline, loadedState.maxOfflineTime || (3 * 60 * 60 * 1000)); const offlineEarnings = (loadedState.profitPerHour / 3600) * (effectiveOfflineTime / 1000); if (offlineEarnings > 1) { loadedState.coins += offlineEarnings; offlinePlayerName.textContent = loadedState.playerName; offlineEarningsDisplay.textContent = formatNumber(Math.floor(offlineEarnings)); offlineEarningsModal.classList.remove('hidden'); setTimeout(() => { offlineEarningsModal.classList.remove('opacity-0', 'scale-95'); }, 10); } gameState = loadedState; if (!gameState.markets || gameState.markets.length === 0) { initializeMarkets(); } else { gameState.markets.forEach(m => { if(!m.type) m.type = typeof m.id === 'number' ? 'city' : 'special'; }); } if (!gameState.offlineUpgradesPurchased) gameState.offlineUpgradesPurchased = []; if(!gameState.maxOfflineTime) gameState.maxOfflineTime = 3*60*60*1000; return true; } return false; }
+
+        // --- Event Listeners ---
+        hamsterButton.addEventListener('click', handleHamsterClick);
+        hamsterButton.addEventListener('touchstart', (e) => { e.preventDefault(); handleHamsterClick(e); }, { passive: false });
+        upgradeTapBtn.addEventListener('click', upgradeTap);
+        boostEnergyBtn.addEventListener('click', boostEnergy);
+        energyRefillBtn.addEventListener('click', upgradeEnergyRefill);
+        rankingBtn.addEventListener('click', () => { populateLeagues(); rankingModal.classList.remove('hidden'); });
+        closeRankingBtn.addEventListener('click', () => rankingModal.classList.add('hidden'));
+        rankingModal.addEventListener('click', (e) => { if (e.target === rankingModal) rankingModal.classList.add('hidden'); });
+        marketsBtn.addEventListener('click', () => { renderMarkets(); marketsModal.classList.remove('hidden'); });
+        closeMarketsBtn.addEventListener('click', () => marketsModal.classList.add('hidden'));
+        marketsModal.addEventListener('click', (e) => { if (e.target === marketsModal) marketsModal.classList.add('hidden'); });
+        shopBtn.addEventListener('click', () => { renderShop(); shopModal.classList.remove('hidden'); });
+        closeShopBtn.addEventListener('click', () => shopModal.classList.add('hidden'));
+        shopModal.addEventListener('click', (e) => { if (e.target === shopModal) shopModal.classList.add('hidden'); });
+        offlineTimeBtn.addEventListener('click', () => { renderOfflineShop(); offlineTimeModal.classList.remove('hidden'); });
+        closeOfflineTimeBtn.addEventListener('click', () => offlineTimeModal.classList.add('hidden'));
+        offlineTimeModal.addEventListener('click', (e) => { if (e.target === offlineTimeModal) offlineTimeModal.classList.add('hidden'); });
+        friendsBtn.addEventListener('click', () => friendsModal.classList.remove('hidden'));
+        closeFriendsBtn.addEventListener('click', () => friendsModal.classList.add('hidden'));
+        friendsModal.addEventListener('click', (e) => { if(e.target === friendsModal) friendsModal.classList.add('hidden'); });
+        closeOfflineBtn.addEventListener('click', () => { offlineEarningsModal.classList.add('opacity-0', 'scale-95'); setTimeout(() => { offlineEarningsModal.classList.add('hidden'); }, 500) });
+        
+        submitReferralBtn.addEventListener('click', () => {
+            referralError.textContent = '';
+            if(gameState.referralClaimed) {
+                referralError.textContent = 'Bonus already claimed.';
+                return;
+            }
+            if(referralCodeInput.value === 'TapTap121') {
+                gameState.coins += 20000;
+                gameState.referralClaimed = true;
+                updateDisplay();
+                saveGame();
+                referralSection.innerHTML = '<p class="text-green-400 text-center">Bonus Claimed!</p>';
+                friendsModal.classList.add('hidden');
+                referralSuccessModal.classList.remove('hidden', 'opacity-0', 'scale-95');
+            } else {
+                referralError.textContent = 'Invalid code.';
+            }
+        });
+
+        closeReferralSuccessBtn.addEventListener('click', () => {
+             referralSuccessModal.classList.add('opacity-0', 'scale-95');
+             setTimeout(() => {
+                referralSuccessModal.classList.add('hidden');
+             }, 500)
+        });
+
+        startGameBtn.addEventListener('click', () => {
+            const name = playerNameInput.value.trim();
+            const age = playerAgeInput.value;
+            regError.textContent = '';
+
+            if (name === '') {
+                regError.textContent = 'Please enter your name.';
+                return;
+            }
+            if (!age || isNaN(age) || age < 1) {
+                regError.textContent = 'Please enter a valid age.';
+                return;
+            }
+
+            gameState.playerName = name;
+            gameState.playerAge = parseInt(age);
+            initializeMarkets(); // Initialize markets for a new player
+            saveGame();
+            registrationModal.classList.add('hidden');
+            checkLeagueUp();
+            updateDisplay();
+        });
+         closeRankUpBtn.addEventListener('click', () => {
+            rankUpModal.classList.add('opacity-0', 'scale-95');
+            setTimeout(() => {
+                rankUpModal.classList.add('hidden');
+            }, 500);
+        });
+
+        // --- Game Loops & Save/Load ---
+        setInterval(applyPassiveIncome, 1000);
+        setInterval(regenerateEnergy, 1000);
+        setInterval(saveGame, 5000);
+
+        // --- Initial Setup ---
+        window.onload = () => {
+            generateLeagues();
+            const hasSave = loadGame();
+            if (!hasSave) {
+                registrationModal.classList.remove('hidden');
+            } else {
+                checkLeagueUp();
+                updateDisplay();
+                if(gameState.referralClaimed){
+                     referralSection.innerHTML = '<p class="text-green-400 text-center">Bonus Claimed!</p>';
+                }
+            }
+        };
+        window.onbeforeunload = saveGame;
+    </script>
+</body>
+</html>
