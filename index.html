@@ -203,7 +203,10 @@
                     </div>
                     <p id="referral-error" class="text-red-500 text-sm mt-2 text-center h-4"></p>
                 </div>
-                 <div id="invite-code-display" class="w-full bg-blue-500 p-4 rounded-lg text-lg font-bold text-center">Your Invite Code: TapTap(...)</div>
+                 <button id="invite-code-display" class="w-full bg-blue-500 hover:bg-blue-600 p-4 rounded-lg text-lg font-bold text-center transition-colors relative">
+                    <span id="invite-code-text">Your Invite Code: TapTap(...)</span>
+                    <span id="invite-code-copy-message" class="absolute right-4 top-1/2 -translate-y-1/2 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded hidden">Copied!</span>
+                </button>
             </div>
         </div>
     </div>
@@ -314,6 +317,8 @@
         const referralSection = document.getElementById('referral-section');
         const referralBonusText = document.getElementById('referral-bonus-text');
         const inviteCodeDisplay = document.getElementById('invite-code-display');
+        const inviteCodeText = document.getElementById('invite-code-text');
+        const inviteCodeCopyMessage = document.getElementById('invite-code-copy-message');
 
         // --- Game State Variables ---
         let gameState = {
@@ -348,7 +353,18 @@
             "TapTap5679": 20000, "TapTap1985": 25000, "TapTap2823": 15000,
             "TapTap0128": 25000, "TapTap8394": 30000, "TapTap2398": 20000
         };
-
+        const superReferralCodes = [
+            "TTsuper1872", "TTsuper1244", "TTsuper3563", "TTsuper1246", "TTsuper1356", 
+            "TTsuper7896", "TTsuper2827", "TTsuper8572", "TTsuper9034", "TTsuper7862", 
+            "TTsuper2081", "TTsuper4013", "TTsuper7439", "TTsuper1230", "TTsuper1807", 
+            "TTsuper5011", "TTsuper3899", "TTsuper0355", "TTsuper0045", "TTsuper1188"
+        ];
+        const diamondReferralCodes = [
+            "Diamond4729", "Diamond0384", "Diamond9167", "Diamond2051", "Diamond7642",
+            "Diamond3890", "Diamond1476", "Diamond6038", "Diamond8257", "Diamond4902",
+            "Diamond1583", "Diamond7310", "Diamond2995", "Diamond4078", "Diamond6701",
+            "Diamond8406", "Diamond3569", "Diamond9124", "Diamond2630", "Diamond7893"
+        ];
         
         function generateLeagues() {
             let threshold = 0;
@@ -401,7 +417,7 @@
             energyRefillCostSpan.textContent = formatNumber(gameState.energyRefillCost);
             currentOfflineTimeSpan.textContent = formatDuration(gameState.maxOfflineTime);
             if(gameState.playerUsername) {
-                inviteCodeDisplay.textContent = `Your Invite Code: TapTap(${gameState.playerUsername})`;
+                inviteCodeText.textContent = `Your Invite Code: TapTap(${gameState.playerUsername})`;
             }
         }
         function showFloatingText(event) { const text = document.createElement('div'); text.textContent = `+${gameState.coinsPerTap}`; text.className = 'floating-text'; const rect = clickArea.getBoundingClientRect(); const x = (event.clientX || event.touches[0].clientX) - rect.left; const y = (event.clientY || event.touches[0].clientY) - rect.top; text.style.left = `${x}px`; text.style.top = `${y}px`; clickArea.appendChild(text); setTimeout(() => text.remove(), 1000); }
@@ -469,6 +485,37 @@
         friendsModal.addEventListener('click', (e) => { if(e.target === friendsModal) friendsModal.classList.add('hidden'); });
         closeOfflineBtn.addEventListener('click', () => { offlineEarningsModal.classList.add('opacity-0', 'scale-95'); setTimeout(() => { offlineEarningsModal.classList.add('hidden'); }, 500) });
         
+        inviteCodeDisplay.addEventListener('click', () => {
+            const textToCopy = `TapTap(${gameState.playerUsername})`;
+            const textArea = document.createElement('textarea');
+            textArea.value = textToCopy;
+            // Make the textarea out of sight
+            textArea.style.position = 'fixed';
+            textArea.style.top = 0;
+            textArea.style.left = 0;
+            textArea.style.width = '2em';
+            textArea.style.height = '2em';
+            textArea.style.padding = 0;
+            textArea.style.border = 'none';
+            textArea.style.outline = 'none';
+            textArea.style.boxShadow = 'none';
+            textArea.style.background = 'transparent';
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+
+            try {
+                document.execCommand('copy');
+                inviteCodeCopyMessage.classList.remove('hidden');
+                setTimeout(() => {
+                    inviteCodeCopyMessage.classList.add('hidden');
+                }, 2000);
+            } catch (err) {
+                console.error('Oops, unable to copy', err);
+            }
+            document.body.removeChild(textArea);
+        });
+
         submitReferralBtn.addEventListener('click', () => {
             const code = referralCodeInput.value.trim();
             referralError.textContent = '';
@@ -479,9 +526,21 @@
             }
             
             let bonus = referralCodes[code];
+            let diamondBonus = 0;
             let isUserInvite = false;
-            
-            if(!bonus) {
+            let isSuperCode = false;
+
+            // Check for super referral codes
+            if (superReferralCodes.includes(code)) {
+                bonus = Math.floor(Math.random() * (5000000 - 3000000 + 1)) + 3000000;
+                isSuperCode = true;
+            } 
+            // Check for diamond referral codes
+            else if (diamondReferralCodes.includes(code)) {
+                diamondBonus = Math.floor(Math.random() * (1000 - 100 + 1)) + 100;
+            }
+            // Check for user invite codes
+            else if(!bonus) {
                  const match = code.match(/^TapTap\((.+)\)$/);
                  if(match && match[1]) {
                      const invitedByUsername = match[1];
@@ -497,8 +556,10 @@
                  }
             }
 
-            if (bonus) {
-                gameState.coins += bonus;
+            if (bonus || diamondBonus > 0) {
+                if (bonus) gameState.coins += bonus;
+                if (diamondBonus) gameState.diamonds += diamondBonus;
+
                 gameState.claimedReferralCodes.push(code);
                 if(isUserInvite) {
                     gameState.claimedInviteCode = true;
@@ -510,7 +571,12 @@
                 referralCodeInput.value = '';
                 friendsModal.classList.add('hidden');
                 
-                referralBonusText.textContent = `You've received a ${formatNumber(bonus)} Coin bonus!`;
+                if (diamondBonus > 0) {
+                     referralBonusText.textContent = `You've received a ${diamondBonus.toLocaleString()} Diamond bonus!`;
+                } else {
+                     referralBonusText.textContent = `You've received a ${formatNumber(bonus)} Coin bonus!`;
+                }
+               
                 referralSuccessModal.classList.remove('hidden');
                 setTimeout(() => {
                     referralSuccessModal.classList.remove('opacity-0', 'scale-95');
