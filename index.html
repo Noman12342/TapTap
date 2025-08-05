@@ -1,763 +1,1279 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="bn">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tap Tap</title>
+    <title>UNIQUE COACHING CENTRE - একটি নির্ভরযোগ্য শিক্ষা প্রতিষ্ঠান</title>
     
-    <!-- Tailwind CSS for styling -->
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- Google Fonts for a clean look -->
+    <!-- Google Fonts & Icons -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     
+    <!-- PDF Generation Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+    <!-- Custom Styles -->
     <style>
-        /* Custom styles and animations */
         body {
-            font-family: 'Inter', sans-serif;
-            touch-action: manipulation;
+            font-family: 'Hind Siliguri', 'Inter', sans-serif;
+            scroll-behavior: smooth;
         }
-        #hamster-button:active { transform: scale(0.95); }
-        @keyframes float-up {
-            to { opacity: 0; transform: translateY(-50px) scale(1.5); }
+        .gradient-text {
+            background: linear-gradient(90deg, #FDB813, #FFAA00);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
-        .floating-text {
-            animation: float-up 1s ease-out forwards;
-            pointer-events: none; position: absolute; font-size: 2rem;
-            font-weight: 800; color: white; text-shadow: 0 0 10px rgba(255, 215, 0, 0.7);
+        .hero-bg {
+            background-color: #1a202c;
+            background-image: radial-gradient(circle at 1px 1px, #374151 1px, transparent 0);
+            background-size: 20px 20px;
         }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .spinner {
-            border: 4px solid rgba(255, 255, 255, 0.2); border-left-color: #fff;
-            border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite;
+        .section-glow {
+            box-shadow: 0 0 40px rgba(253, 184, 19, 0.1);
         }
-        .bg-telegram-dark { background-color: #17212b; }
-        .bg-telegram-secondary { background-color: #242f3d; }
-        .hamster-glow { filter: drop-shadow(0 0 25px rgba(253, 224, 71, 0.4)); }
-        .hamster-glow:hover { filter: drop-shadow(0 0 35px rgba(253, 224, 71, 0.6)); }
-        
-        /* Unique Ranking List Styles */
-        .rank-locked { background-color: #374151; color: #6b7280; cursor: not-allowed; }
-        .rank-current { transform: scale(1.05); box-shadow: 0 0 15px rgba(255, 223, 71, 0.9); border: 2px solid #facc15; }
-        #offline-earnings-modal, #offline-time-modal, #friends-modal, #rank-up-modal, #referral-success-modal, #more-modal { transition: opacity 0.3s ease-in-out; }
-        
-        #more-modal .modal-content {
-            transition: transform 0.3s ease-in-out;
+        .modal {
+            transition: opacity 0.3s ease;
         }
-
-        /* 3D Button Styles */
-        .btn-3d {
-            border-radius: 0.5rem;
-            border: 1px solid black;
-            transition: all 0.1s ease-in-out;
+        .modal-content {
+            transition: transform 0.3s ease;
         }
-        .btn-3d:active {
-            transform: translateY(4px);
-            border-bottom-width: 2px;
+        .form-input:focus-within {
+            border-color: #FDB813;
+            box-shadow: 0 0 0 2px rgba(253, 184, 19, 0.5);
         }
-        .btn-blue { background-color: #2563eb; border-bottom: 6px solid #1d4ed8; }
-        .btn-yellow { background-color: #f59e0b; border-bottom: 6px solid #b45309; }
-        .btn-cyan { background-color: #06b6d4; border-bottom: 6px solid #0891b2; }
-        .btn-indigo { background-color: #4f46e5; border-bottom: 6px solid #4338ca; }
-        .btn-purple { background-color: #9333ea; border-bottom: 6px solid #7e22ce; }
-        .btn-orange { background-color: #f97316; border-bottom: 6px solid #ea580c; }
-        .btn-green { background-color: #16a34a; border-bottom: 6px solid #15803d; }
-        .btn-teal { background-color: #0d9488; border-bottom: 6px solid #0f766e; }
-        .btn-gray { background-color: #6b7280; border-bottom: 6px solid #4b5563;}
-
-        /* Dynamically generated rank styles will be added here by JS */
+        .form-input.invalid {
+            border-color: #ef4444; /* red-500 */
+        }
+        /* Tab Styles */
+        .custom-tab {
+            padding: 8px 16px;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+        .custom-tab.active {
+            border-color: #FDB813;
+            color: #FDB813;
+        }
+        .class-tab {
+             background-color: #374151;
+             color: white;
+             padding: 6px 12px;
+             border-radius: 9999px;
+             font-size: 0.875rem;
+             transition: all 0.3s ease;
+        }
+        .class-tab.active {
+            background-color: #FDB813;
+            color: #1a202c;
+            font-weight: bold;
+        }
+        /* Course Slider */
+        .course-slider-container {
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none;  /* Internet Explorer 10+ */
+        }
+        .course-slider-container::-webkit-scrollbar { 
+            display: none;  /* Safari and Chrome */
+        }
+        /* Print styles for Receipt */
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            #receipt-content, #receipt-content * {
+                visibility: visible;
+            }
+            #receipt-content {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+            }
+        }
     </style>
 </head>
-<body class="bg-telegram-dark text-white select-none">
+<body class="bg-gray-900 text-gray-200">
 
-    <div id="game-container" class="w-full min-h-screen flex items-center justify-center sm:p-4">
-        <div class="w-full h-screen sm:h-auto sm:max-w-md bg-telegram-secondary sm:rounded-2xl shadow-2xl p-4 sm:p-6 flex flex-col">
+    <!-- Header Section -->
+    <header class="bg-gray-900/80 backdrop-blur-sm sticky top-0 z-50 shadow-lg shadow-yellow-500/5">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="#" class="text-2xl font-bold text-white">
+                UNIQUE <span class="gradient-text">COACHING CENTRE</span>
+            </a>
+            <div class="hidden md:flex space-x-6 items-center">
+                <a href="#home" class="hover:text-yellow-400 transition duration-300">হোম</a>
+                <a href="#about" class="hover:text-yellow-400 transition duration-300">আমাদের সম্পর্কে</a>
+                <a href="javascript:void(0)" data-modal-target="courses-modal" class="modal-trigger hover:text-yellow-400 transition duration-300">কোর্সসমূহ</a>
+                <a href="javascript:void(0)" data-modal-target="teachers-modal" class="modal-trigger hover:text-yellow-400 transition duration-300">শিক্ষকবৃন্দ</a>
+                <a href="javascript:void(0)" data-modal-target="routine-modal" class="protected-link modal-trigger hover:text-yellow-400 transition duration-300">রুটিন</a>
+                <a href="javascript:void(0)" data-modal-target="suggestions-modal" class="protected-link modal-trigger hover:text-yellow-400 transition duration-300">সাজেশন</a>
+                <div id="auth-section">
+                    <a href="javascript:void(0)" data-modal-target="login-modal" id="login-btn" class="modal-trigger bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold py-2 px-4 rounded-lg transition duration-300">লগইন</a>
+                </div>
+            </div>
+            <div class="md:hidden">
+                <button id="menu-btn" class="text-white focus:outline-none">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                </button>
+            </div>
+        </nav>
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden md:hidden bg-gray-800">
+             <a href="#home" class="block py-2 px-4 text-sm hover:bg-gray-700">হোম</a>
+            <a href="#about" class="block py-2 px-4 text-sm hover:bg-gray-700">আমাদের সম্পর্কে</a>
+            <a href="javascript:void(0)" data-modal-target="courses-modal" class="modal-trigger block py-2 px-4 text-sm hover:bg-gray-700">কোর্সসমূহ</a>
+            <a href="javascript:void(0)" data-modal-target="teachers-modal" class="modal-trigger block py-2 px-4 text-sm hover:bg-gray-700">শিক্ষকবৃন্দ</a>
+            <a href="javascript:void(0)" data-modal-target="routine-modal" class="protected-link modal-trigger block py-2 px-4 text-sm hover:bg-gray-700">রুটিন</a>
+            <a href="javascript:void(0)" data-modal-target="suggestions-modal" class="protected-link modal-trigger block py-2 px-4 text-sm hover:bg-gray-700">সাজেশন</a>
+            <a href="#testimonials" class="block py-2 px-4 text-sm hover:bg-gray-700">শিক্ষার্থীদের মতামত</a>
+            <a href="#gallery" class="block py-2 px-4 text-sm hover:bg-gray-700">গ্যালারি</a>
+            <a href="#faq" class="block py-2 px-4 text-sm hover:bg-gray-700">প্রশ্নোত্তর</a>
+            <div id="mobile-auth-section" class="p-4">
+                 <a href="javascript:void(0)" data-modal-target="login-modal" id="mobile-login-btn" class="modal-trigger bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold py-2 px-4 rounded-lg transition duration-300 w-full block text-center">লগইন</a>
+            </div>
+        </div>
+    </header>
 
-            <!-- Top Section -->
-            <div class="flex-shrink-0">
-                <!-- Top Info Bar -->
-                <div class="flex items-center justify-between text-sm">
-                    <div class="text-left">
-                        <div id="player-name-display" class="font-bold text-lg text-teal-400">Player</div>
-                        <div class="flex items-center space-x-1">
-                           <img src="https://img.icons8.com/plasticine/100/diamond.png" alt="diamond" class="w-6 h-6">
-                           <div id="diamond-display-top" class="font-bold text-lg">0</div>
+    <main>
+        <!-- Hero Section -->
+        <section id="home" class="hero-bg py-20 md:py-32">
+            <div class="container mx-auto px-6 text-center">
+                <h1 class="text-4xl md:text-6xl font-extrabold text-white leading-tight mb-4">
+                    সেরা ফলাফলের বিশ্বস্ত ঠিকানা <br class="hidden md:block"/> <span class="gradient-text">ইউনিক কোচিং সেন্টার</span>
+                </h1>
+                <p class="text-lg md:text-xl text-gray-400 max-w-3xl mx-auto mb-8">
+                    আমরা শিক্ষার্থীদের স্বপ্ন পূরণে প্রতিশ্রুতিবদ্ধ। অভিজ্ঞ শিক্ষক এবং আধুনিক পাঠদানের মাধ্যমে প্রতিটি শিক্ষার্থীর সেরাটা বের করে আনাই আমাদের লক্ষ্য।
+                </p>
+                <a href="javascript:void(0)" data-modal-target="admission-modal" class="modal-trigger bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold py-3 px-8 rounded-full text-lg transition duration-300 transform hover:scale-105">
+                    ভর্তি চলছে
+                </a>
+            </div>
+        </section>
+
+        <!-- Featured Courses Section -->
+        <section id="featured-courses" class="py-20 bg-gray-900">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold text-white">আমাদের <span class="gradient-text">জনপ্রিয় কোর্সসমূহ</span></h2>
+                    <p class="text-gray-400 mt-2">আপনার পছন্দের কোর্সটি বেছে নিন</p>
+                </div>
+                <div class="relative">
+                    <div id="featured-courses-container" class="course-slider-container flex gap-8 overflow-x-auto snap-x snap-mandatory px-4 py-2">
+                        <!-- Featured courses will be populated by JS -->
+                    </div>
+                    <button id="scroll-left" class="absolute top-1/2 left-0 transform -translate-y-1/2 bg-gray-800/50 hover:bg-yellow-500 text-white hover:text-black rounded-full p-2 transition duration-300 z-10 hidden md:block">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+                    </button>
+                    <button id="scroll-right" class="absolute top-1/2 right-0 transform -translate-y-1/2 bg-gray-800/50 hover:bg-yellow-500 text-white hover:text-black rounded-full p-2 transition duration-300 z-10 hidden md:block">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- About Us Section -->
+        <section id="about" class="py-20 bg-gray-800/50">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold text-white">আমাদের <span class="gradient-text">সম্পর্কে</span></h2>
+                    <p class="text-gray-400 mt-2">যে কারণে আমরা অন্যদের থেকে আলাদা</p>
+                </div>
+                <div class="flex flex-col-reverse md:flex-row items-center gap-10">
+                    <div class="md:w-1/2">
+                        <h3 class="text-2xl font-semibold text-white mb-4">আমাদের লক্ষ্য ও উদ্দেশ্য</h3>
+                        <p class="text-gray-400 mb-4">
+                            ইউনিক কোচিং সেন্টারের পথচলা শুরু হয়েছিল একদল মেধাবী ও অভিজ্ঞ শিক্ষকের হাত ধরে, যাদের মূল উদ্দেশ্য ছিল শিক্ষার্থীদের জন্য একটি সহজ ও কার্যকর শিক্ষার পরিবেশ তৈরি করা। আমরা শুধুমাত্র পাঠ্যবইয়ের পড়াই সীমাবদ্ধ রাখি না, বরং শিক্ষার্থীদের মেধা ও সৃজনশীলতার বিকাশেও সাহায্য করি।
+                        </p>
+                        <p class="text-gray-400">
+                            আমাদের আধুনিক ক্লাসরুম, নিয়মিত পরীক্ষা এবং অভিভাবকদের সাথে নিবিড় যোগাযোগ প্রতিটি শিক্ষার্থীকে তার লক্ষ্যে পৌঁছাতে সহায়তা করে।
+                        </p>
+                    </div>
+                    <div class="md:w-1/2">
+                        <div class="grid grid-cols-2 grid-rows-2 gap-4">
+                            <img src="https://img.freepik.com/free-vector/teacher-concept-illustration_114360-1637.jpg?w=740" alt="শিক্ষক পাঠদান করছেন" class="rounded-xl w-full h-full object-cover shadow-lg section-glow col-span-2 row-span-1" onerror="this.onerror=null;this.src='https://placehold.co/600x300/1a202c/FDB813?text=Shikkhok';">
+                            <img src="https://img.freepik.com/free-vector/online-certification-concept_23-2148575645.jpg?w=740" alt="অনলাইন শিক্ষা" class="rounded-xl w-full h-full object-cover shadow-lg section-glow" onerror="this.onerror=null;this.src='https://placehold.co/300x200/1a202c/FDB813?text=Online+Shikkha';">
+                            <img src="https://img.freepik.com/free-vector/online-learning-concept-illustration_114360-4792.jpg?w=740" alt="শিক্ষার্থীরা পড়ছে" class="rounded-xl w-full h-full object-cover shadow-lg section-glow" onerror="this.onerror=null;this.src='https://placehold.co/300x200/1a202c/FDB813?text=Shikkharthira';">
                         </div>
                     </div>
-                    <div class="flex justify-center">
-                        <div id="league-badge" class="px-3 py-1.5 rounded-full font-bold text-gray-900 transition-all duration-500 text-xs text-center bg-gray-400">Intern</div>
-                    </div>
-                    <div class="text-right">
-                        <div class="text-gray-400">Profit/hour</div>
-                        <div id="profit-display" class="font-bold text-yellow-400">+0</div>
-                    </div>
-                </div>
-
-                <!-- Main Score Display -->
-                <div class="text-center pt-4 pb-2">
-                    <div class="text-lg text-gray-400">Coin</div>
-                    <h1 id="score-display-main" class="text-5xl sm:text-6xl font-extrabold">0</h1>
                 </div>
             </div>
+        </section>
 
-            <!-- Middle Section (Coin) -->
-            <div id="click-area" class="flex justify-center items-center flex-grow cursor-pointer">
-                <div id="hamster-button" class="transition duration-100 ease-in-out w-36 h-36 sm:w-40 sm:h-40 pointer-events-none">
-                    <div class="relative hamster-glow w-full h-full">
-                        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" class="w-full h-full">
-                            <defs>
-                                <radialGradient id="grad1" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
-                                    <stop offset="0%" style="stop-color:rgb(255,255,204);stop-opacity:1" />
-                                    <stop offset="100%" style="stop-color:rgb(255,215,0);stop-opacity:1" />
-                                </radialGradient>
-                            </defs>
-                            <circle cx="50" cy="50" r="48" fill="url(#grad1)" stroke="#B8860B" stroke-width="4"/>
-                            <text x="50" y="65" font-family="'Inter', sans-serif" font-size="40" font-weight="800" text-anchor="middle" fill="#8B4513">T</text>
-                        </svg>
+        <!-- Testimonials Section -->
+        <section id="testimonials" class="py-20 bg-gray-900">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold text-white">আমাদের <span class="gradient-text">কৃতি শিক্ষার্থীরা</span></h2>
+                    <p class="text-gray-400 mt-2">যাদের সাফল্যে আমরা গর্বিত</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <!-- Testimonial 1 -->
+                    <div class="bg-gray-800 p-6 rounded-xl section-glow">
+                        <p class="text-gray-300 mb-4">"ইউনিক কোচিং সেন্টারের গাইডলাইন আমার সাফল্যের পেছনে অনেক বড় ভূমিকা রেখেছে। এখানকার শিক্ষকরা খুবই আন্তরিক।"</p>
+                        <div class="flex items-center">
+                            <img class="w-12 h-12 rounded-full mr-4 border-2 border-yellow-400" src="https://placehold.co/48x48/374151/FFFFFF?text=S" alt="Student photo">
+                            <div>
+                                <p class="font-bold text-white">[শিক্ষার্থীর নাম]</p>
+                                <p class="text-sm text-gray-400">[তার শ্রেণী ও ফলাফল]</p>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Testimonial 2 -->
+                    <div class="bg-gray-800 p-6 rounded-xl section-glow">
+                        <p class="text-gray-300 mb-4">"নিয়মিত পরীক্ষা এবং শিক্ষকদের সঠিক দিকনির্দেশনা আমাকে আমার লক্ষ্যে পৌঁছাতে সাহায্য করেছে। ধন্যবাদ ইউনিক কোচিং।"</p>
+                        <div class="flex items-center">
+                            <img class="w-12 h-12 rounded-full mr-4 border-2 border-yellow-400" src="https://placehold.co/48x48/374151/FFFFFF?text=S" alt="Student photo">
+                            <div>
+                                <p class="font-bold text-white">[শিক্ষার্থীর নাম]</p>
+                                <p class="text-sm text-gray-400">[তার শ্রেণী ও ফলাফল]</p>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Testimonial 3 -->
+                    <div class="bg-gray-800 p-6 rounded-xl section-glow">
+                        <p class="text-gray-300 mb-4">" এখানকার বন্ধুত্বপূর্ণ পরিবেশ এবং শিক্ষকদের আন্তরিকতা আমাকে পড়াশোনায় আরও বেশি মনোযোগী হতে সাহায্য করেছে।"</p>
+                        <div class="flex items-center">
+                            <img class="w-12 h-12 rounded-full mr-4 border-2 border-yellow-400" src="https://placehold.co/48x48/374151/FFFFFF?text=S" alt="Student photo">
+                            <div>
+                                <p class="font-bold text-white">[শিক্ষার্থীর নাম]</p>
+                                <p class="text-sm text-gray-400">[তার শ্রেণী ও ফলাফল]</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
+        </section>
 
-            <!-- Bottom Section (Controls) -->
-            <div class="flex-shrink-0 space-y-3">
-                <div class="space-y-1">
-                    <div class="flex justify-between text-sm font-bold">
-                        <span>⚡️ Energy (<span id="energy-regen-rate">1</span>/s)</span>
-                        <span id="energy-display">1000/1000</span>
-                    </div>
-                    <div class="w-full bg-gray-700 rounded-full h-3">
-                        <div id="energy-bar" class="bg-yellow-400 h-3 rounded-full transition-all duration-300" style="width: 100%;"></div>
-                    </div>
+        <!-- Gallery Section -->
+        <section id="gallery" class="py-20 bg-gray-800/50">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold text-white">আমাদের <span class="gradient-text">ফটো গ্যালারি</span></h2>
+                    <p class="text-gray-400 mt-2">কিছু স্মরণীয় মুহূর্ত</p>
                 </div>
-                <div class="grid grid-cols-2 gap-1 pt-1 text-center">
-                    <button id="upgrade-tap-btn" class="p-1.5 font-bold flex flex-col justify-center btn-3d btn-blue">
-                        <div class="text-[11px]">Boost Tap</div>
-                        <div class="text-[9px] font-normal">Cost: <span id="tap-upgrade-cost">100</span></div>
-                    </button>
-                    <button id="boost-energy-btn" class="p-1.5 font-bold flex flex-col justify-center btn-3d btn-yellow">
-                        <div class="text-[11px]">⚡️ Boost Energy</div>
-                        <div class="text-[9px] font-normal">Cost: <span id="boost-energy-cost">200</span></div>
-                    </button>
-                    <button id="energy-refill-btn" class="p-1.5 font-bold flex flex-col justify-center btn-3d btn-cyan">
-                        <div class="text-[11px]">Energy Refill</div>
-                        <div class="text-[9px] font-normal">Cost: <span id="energy-refill-cost">500</span></div>
-                    </button>
-                    <button id="offline-time-btn" class="p-1.5 font-bold flex flex-col justify-center btn-3d btn-indigo">
-                        <div class="text-[11px]">🕒 Offline Time</div>
-                        <div class="text-[9px] font-normal">Extend</div>
-                    </button>
-                </div>
-                 <div class="pt-1">
-                    <button id="more-btn" class="w-full p-2 font-bold btn-3d btn-gray text-base">More</button>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <img src="https://placehold.co/600x400/1a202c/FDB813?text=Event+1" alt="Coaching event photo" class="rounded-lg section-glow transform hover:scale-105 transition duration-300">
+                    <img src="https://placehold.co/600x400/1a202c/FDB813?text=Event+2" alt="Coaching event photo" class="rounded-lg section-glow transform hover:scale-105 transition duration-300">
+                    <img src="https://placehold.co/600x400/1a202c/FDB813?text=Event+3" alt="Coaching event photo" class="rounded-lg section-glow transform hover:scale-105 transition duration-300">
+                    <img src="https://placehold.co/600x400/1a202c/FDB813?text=Event+4" alt="Coaching event photo" class="rounded-lg section-glow transform hover:scale-105 transition duration-300">
                 </div>
             </div>
+        </section>
 
+        <!-- FAQ Section -->
+        <section id="faq" class="py-20 bg-gray-900">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold text-white">সাধারণ <span class="gradient-text">প্রশ্নোত্তর</span></h2>
+                    <p class="text-gray-400 mt-2">আপনার জিজ্ঞাসার সমাধান</p>
+                </div>
+                <div class="max-w-3xl mx-auto">
+                    <!-- FAQ Item 1 -->
+                    <div class="bg-gray-800 rounded-lg mb-4 section-glow">
+                        <button class="accordion-btn w-full flex justify-between items-center p-5 font-semibold text-left text-white">
+                            <span>ভর্তি প্রক্রিয়া কিভাবে সম্পন্ন করতে হয়?</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                        <div class="accordion-content hidden p-5 border-t border-gray-700">
+                            <p class="text-gray-400">
+                                আপনি আমাদের ওয়েবসাইটে দেওয়া "ভর্তি চলছে" বাটনে ক্লিক করে অনলাইনে ফর্ম পূরণ করতে পারেন। ফর্মটি সফলভাবে সাবমিট করার পর প্রাপ্ত রসিদটি নিয়ে অফিসে যোগাযোগ করে আপনার ভর্তি নিশ্চিত করতে হবে।
+                            </p>
+                        </div>
+                    </div>
+                    <!-- FAQ Item 2 -->
+                    <div class="bg-gray-800 rounded-lg mb-4 section-glow">
+                        <button class="accordion-btn w-full flex justify-between items-center p-5 font-semibold text-left text-white">
+                            <span>মাসিক ফি পরিশোধের নিয়ম কি?</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                        <div class="accordion-content hidden p-5 border-t border-gray-700">
+                            <p class="text-gray-400">
+                                মাসিক ফি সাধারণত মাসের প্রথম সপ্তাহের মধ্যে অফিসে এসে পরিশোধ করতে হয়। এছাড়া, মোবাইল ব্যাংকিং এর মাধ্যমেও ফি পরিশোধের ব্যবস্থা রয়েছে। বিস্তারিত জানতে অফিসে যোগাযোগ করুন।
+                            </p>
+                        </div>
+                    </div>
+                    <!-- FAQ Item 3 -->
+                    <div class="bg-gray-800 rounded-lg mb-4 section-glow">
+                        <button class="accordion-btn w-full flex justify-between items-center p-5 font-semibold text-left text-white">
+                            <span>কোনো শিক্ষার্থী ক্লাসে অনুপস্থিত থাকলে করণীয় কি?</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                        <div class="accordion-content hidden p-5 border-t border-gray-700">
+                            <p class="text-gray-400">
+                                কোনো শিক্ষার্থী অসুস্থতা বা অন্য কোনো জরুরি কারণে ক্লাসে অনুপস্থিত থাকলে, অভিভাবককে অবশ্যই কোচিং কর্তৃপক্ষকে জানাতে হবে। অনুপস্থিত ক্লাসের জন্য বিশেষ অতিরিক্ত ক্লাসের ব্যবস্থা করা হয়।
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Location Section -->
+        <section id="location" class="py-20 bg-gray-800/50">
+            <div class="container mx-auto px-6">
+                 <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold text-white">আমাদের <span class="gradient-text">অবস্থান</span></h2>
+                    <p class="text-gray-400 mt-2">আমাদের খুঁজে পেতে গুগল ম্যাপ ব্যবহার করুন</p>
+                </div>
+                <div class="w-full h-96 rounded-lg overflow-hidden section-glow">
+                    <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d118147.9948488337!2d90.35471994999999!3d23.75086395!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3755b8b087026b81%3A0x8fa563bbdd5904c2!2sDhaka!5e0!3m2!1sen!2sbd!4v1662462725581!5m2!1sen!2sbd" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer Section -->
+    <footer id="contact" class="bg-gray-900 border-t border-gray-700 mt-20">
+        <div class="container mx-auto px-6 py-10">
+            <div class="flex flex-col md:flex-row justify-between items-center text-center md:text-left">
+                <div class="mb-6 md:mb-0">
+                    <h3 class="text-xl font-bold text-white">UNIQUE <span class="gradient-text">COACHING CENTRE</span></h3>
+                    <p class="text-gray-400 mt-2">ইব্রাহিম শপিং সেন্টার ২য় তলা, বাংলাবাজার, সাতকানিয়া,চট্টগ্রাম</p>
+                </div>
+                <div class="text-gray-400">
+                    <p>ইমেইল: <a href="mailto:info@unique.com" class="hover:text-yellow-400">[আপনার ইমেইল]</a></p>
+                    <p>ফোন: <a href="tel:+8801XXXXXXXXX" class="hover:text-yellow-400">[আপনার ফোন নম্বর]</a></p>
+                </div>
+            </div>
+            <div class="mt-8 border-t border-gray-800 pt-6 text-center text-gray-500">
+                <p>&copy; ২০২৫ | UNIQUE COACHING CENTRE | সকল স্বত্ব সংরক্ষিত।</p>
+            </div>
         </div>
-    </div>
-    
+    </footer>
+
     <!-- Modals -->
-    <div id="more-modal" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-end justify-center p-0 z-50 opacity-0">
-        <div id="more-modal-content" class="modal-content bg-telegram-secondary rounded-t-2xl shadow-2xl p-6 w-full max-w-md transform translate-y-full">
-            <div class="flex justify-between items-center mb-4">
-                <h2 class="text-2xl font-bold text-gray-300">More Options</h2>
-                <button id="close-more-btn" class="text-gray-400 hover:text-white text-3xl font-bold">&times;</button>
+    <!-- Courses Modal -->
+    <div id="courses-modal" class="modal fixed inset-0 bg-black bg-opacity-70 z-50 hidden flex items-center justify-center p-4 opacity-0 pointer-events-none">
+        <div class="modal-content bg-gray-800 rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col p-6 transform scale-95">
+            <button class="modal-close absolute top-4 right-4 text-gray-400 hover:text-white text-3xl">&times;</button>
+            <div class="text-center mb-8 flex-shrink-0">
+                <h2 class="text-3xl md:text-4xl font-bold text-white">আমাদের <span class="gradient-text">কোর্সসমূহ</span></h2>
+                <p class="text-gray-400 mt-2">আপনার প্রয়োজন অনুযায়ী কোর্স বেছে নিন</p>
             </div>
-            <div class="grid grid-cols-2 gap-2 text-center">
-                 <button id="markets-btn" class="p-2 font-bold flex flex-col justify-center btn-3d btn-purple">
-                    <div class="text-xs">📈 Markets</div>
-                    <div class="text-[10px] font-normal">Boost Profit</div>
-                </button>
-                 <button id="shop-btn" class="p-2 font-bold flex flex-col justify-center btn-3d btn-orange">
-                    <div class="text-xs">🛒 Shop</div>
-                    <div class="text-[10px] font-normal">Exchange</div>
-                </button>
-                <button id="ranking-btn" class="p-2 font-bold flex flex-col justify-center btn-3d btn-green">
-                    <div class="text-xs">🏆 Ranking</div>
-                    <div class="text-[10px] font-normal">View Ranks</div>
-                </button>
-                 <button id="friends-btn" class="p-2 font-bold flex flex-col justify-center btn-3d btn-teal">
-                    <div class="text-xs">🧑‍🤝‍🧑 Friends</div>
-                    <div class="text-[10px] font-normal">Invite & Earn</div>
-                </button>
+            <div id="courses-display" class="overflow-y-auto">
+                <!-- Courses will be populated by JS -->
             </div>
         </div>
     </div>
-
-     <div id="rank-up-modal" class="hidden fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center p-4 z-50 opacity-0 transform scale-95">
-        <div class="bg-telegram-secondary rounded-2xl shadow-2xl p-8 w-full max-w-sm text-center relative overflow-hidden border-2 border-yellow-400">
-             <h2 class="text-4xl font-bold text-yellow-400 mb-2">Congratulations!</h2>
-             <p class="text-lg text-gray-300 mb-4">You have been promoted to</p>
-             <p id="new-rank-name" class="text-3xl font-extrabold text-white mb-6 bg-gray-800/50 rounded-lg p-2"></p>
-             <button id="close-rank-up-btn" class="bg-blue-600 hover:bg-blue-700 px-6 py-2 rounded-lg font-bold transition w-full">Awesome!</button>
+    <!-- Teachers Modal -->
+    <div id="teachers-modal" class="modal fixed inset-0 bg-black bg-opacity-70 z-50 hidden flex items-center justify-center p-4 opacity-0 pointer-events-none">
+        <div class="modal-content bg-gray-800 rounded-xl shadow-2xl w-full max-w-5xl max-h-[90vh] flex flex-col p-6 transform scale-95">
+            <button class="modal-close absolute top-4 right-4 text-gray-400 hover:text-white text-3xl">&times;</button>
+            <div class="text-center mb-12 flex-shrink-0">
+                <h2 class="text-3xl md:text-4xl font-bold text-white">আমাদের অভিজ্ঞ <span class="gradient-text">শিক্ষকবৃন্দ</span></h2>
+                <p class="text-gray-400 mt-2">যাদের হাত ধরে শিক্ষার্থীরা পৌঁছে যায় সাফল্যের শীর্ষে</p>
+            </div>
+            <div id="teachers-display" class="overflow-y-auto">
+                <!-- Teachers will be populated by JS -->
+            </div>
         </div>
     </div>
     
-     <div id="referral-success-modal" class="hidden fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center p-4 z-50 opacity-0 transform scale-95">
-        <div class="bg-telegram-secondary rounded-2xl shadow-2xl p-8 w-full max-w-sm text-center relative overflow-hidden border-2 border-green-400">
-             <h2 class="text-3xl font-bold text-green-400 mb-2">Success!</h2>
-             <p id="referral-bonus-text" class="text-lg text-white mb-6">You've received a bonus!</p>
-             <button id="close-referral-success-btn" class="bg-green-600 hover:bg-green-700 px-6 py-2 rounded-lg font-bold transition w-full">Great!</button>
-        </div>
-    </div>
-
-
-    <div id="registration-modal" class="hidden fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center p-4 z-50">
-        <div class="bg-telegram-secondary rounded-2xl shadow-2xl p-8 w-full max-w-sm text-center">
-            <h2 class="text-3xl font-bold text-yellow-400 mb-4">Welcome to Tap Tap!</h2>
-            <p class="text-gray-300 mb-6">Let's get you started.</p>
-            <div class="space-y-4">
-                 <input type="text" id="player-name-input" placeholder="Enter your name" class="w-full bg-gray-700 text-white p-3 rounded-lg text-center focus:outline-none focus:ring-2 focus:ring-yellow-500">
-                 <input type="text" id="player-username-input" placeholder="Create a username (letters & numbers only)" class="w-full bg-gray-700 text-white p-3 rounded-lg text-center focus:outline-none focus:ring-2 focus:ring-yellow-500">
-                 <input type="number" id="player-age-input" placeholder="Enter your age" class="w-full bg-gray-700 text-white p-3 rounded-lg text-center focus:outline-none focus:ring-2 focus:ring-yellow-500">
-                 <button id="start-game-btn" class="w-full bg-green-600 hover:bg-green-700 p-3 rounded-lg font-bold text-lg transition">Start Tapping</button>
-            </div>
-            <p id="reg-error" class="text-red-500 text-sm mt-4 h-4"></p>
-        </div>
-    </div>
-    
-    <div id="offline-earnings-modal" class="hidden fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center p-4 z-50 opacity-0 transform scale-95">
-        <div class="bg-telegram-secondary rounded-2xl shadow-2xl p-6 w-full max-w-sm text-center">
-            <h2 class="text-2xl font-bold text-yellow-400 mb-2">Welcome Back, <span id="offline-player-name"></span>!</h2>
-            <p class="mb-4">While you were away, you earned:</p>
-            <p id="offline-earnings-display" class="text-4xl font-extrabold text-white mb-6">0</p>
-            <button id="close-offline-btn" class="bg-blue-600 hover:bg-blue-700 px-6 py-2 rounded-lg font-bold transition w-full">Claim</button>
-        </div>
-    </div>
-
-    <div id="friends-modal" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50">
-        <div class="bg-telegram-secondary rounded-2xl shadow-2xl p-6 w-full max-w-lg">
-             <div class="flex justify-between items-center mb-4">
-                <h2 class="text-2xl font-bold text-teal-400">Friends & Bonuses</h2>
-                <button id="close-friends-btn" class="text-gray-400 hover:text-white text-3xl font-bold">&times;</button>
-            </div>
-            <div class="space-y-4">
-                 <div id="referral-section">
-                    <p class="text-center mb-2 text-gray-300">Enter a referral code for a bonus!</p>
-                    <div class="flex space-x-2">
-                        <input type="text" id="referral-code-input" placeholder="Referral Code" class="w-full bg-gray-800 text-white p-3 rounded-lg text-center focus:outline-none focus:ring-2 focus:ring-teal-500">
-                        <button id="submit-referral-btn" class="bg-teal-600 hover:bg-teal-700 px-6 py-2 rounded-lg font-bold">Submit</button>
-                    </div>
-                    <p id="referral-error" class="text-red-500 text-sm mt-2 text-center h-4"></p>
+    <!-- Routine Modal -->
+    <div id="routine-modal" class="modal fixed inset-0 bg-black bg-opacity-70 z-[60] hidden flex items-center justify-center p-4 opacity-0 pointer-events-none">
+        <div class="modal-content bg-gray-800 rounded-xl shadow-2xl w-full max-w-6xl max-h-[90vh] flex flex-col p-6 transform scale-95">
+            <div class="flex-shrink-0">
+                <button class="modal-close absolute top-4 right-4 text-gray-400 hover:text-white text-3xl">&times;</button>
+                <div class="text-center mb-4">
+                    <h2 class="text-3xl md:text-4xl font-bold text-white">ক্লাস <span class="gradient-text">রুটিন</span></h2>
+                    <p class="text-gray-400 mt-2">আপনার কারিকুলাম ও শ্রেণী অনুযায়ী রুটিন দেখুন</p>
                 </div>
-                 <button id="invite-code-display" class="w-full bg-blue-500 hover:bg-blue-600 p-4 rounded-lg text-lg font-bold text-center transition-colors relative">
-                    <span id="invite-code-text">Your Invite Code: TapTap(...)</span>
-                    <span id="invite-code-copy-message" class="absolute right-4 top-1/2 -translate-y-1/2 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded hidden">Copied!</span>
-                </button>
+                <div id="routine-curriculum-tabs" class="flex justify-center mb-4 border-b border-gray-700 font-bold">
+                    <!-- Curriculum tabs will be populated by JS -->
+                </div>
+                <div id="routine-class-tabs-container" class="flex flex-wrap justify-center gap-2 mb-6">
+                    <!-- Class tabs will be populated by JS -->
+                </div>
             </div>
-        </div>
-    </div>
-    
-    <div id="offline-time-modal" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50">
-        <div class="bg-telegram-secondary rounded-2xl shadow-2xl p-6 w-full max-w-lg">
-             <div class="flex justify-between items-center mb-4">
-                <h2 class="text-2xl font-bold text-indigo-400">Extend Offline Time</h2>
-                <button id="close-offline-time-btn" class="text-gray-400 hover:text-white text-3xl font-bold">&times;</button>
+            <div id="routine-display" class="overflow-y-auto flex-grow">
+                <!-- Routine table/grid will be generated here by JS -->
             </div>
-            <div class="text-center mb-4">
-                <p>Current Max Offline Time: <span id="current-offline-time" class="font-bold text-yellow-400">3h</span></p>
-            </div>
-            <div id="offline-time-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
         </div>
     </div>
 
-    <div id="shop-modal" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50">
-        <div class="bg-telegram-secondary rounded-2xl shadow-2xl p-6 w-full max-w-lg">
-             <div class="flex justify-between items-center mb-4">
-                <h2 class="text-2xl font-bold text-orange-400">Coin Exchange</h2>
-                <button id="close-shop-btn" class="text-gray-400 hover:text-white text-3xl font-bold">&times;</button>
+    <!-- Suggestions Modal -->
+    <div id="suggestions-modal" class="modal fixed inset-0 bg-black bg-opacity-70 z-[60] hidden flex items-center justify-center p-4 opacity-0 pointer-events-none">
+        <div class="modal-content bg-gray-800 rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col p-6 transform scale-95">
+             <div class="flex-shrink-0">
+                <button class="modal-close absolute top-4 right-4 text-gray-400 hover:text-white text-3xl">&times;</button>
+                <div class="text-center mb-4">
+                    <h2 class="text-3xl md:text-4xl font-bold text-white">গুরুত্বপূর্ণ <span class="gradient-text">সাজেশন</span></h2>
+                    <p class="text-gray-400 mt-2">আপনার বিষয় অনুযায়ী সাজেশন ডাউনলোড করুন</p>
+                </div>
+                <div id="suggestion-curriculum-tabs" class="flex justify-center mb-4 border-b border-gray-700 font-bold">
+                    <!-- Curriculum tabs will be populated by JS -->
+                </div>
+                <div id="suggestion-class-tabs-container" class="flex flex-wrap justify-center gap-2 mb-6">
+                    <!-- Class tabs will be populated by JS -->
+                </div>
             </div>
-            <div class="text-center mb-4">
-                <p>Your Diamonds: <span id="diamond-balance-shop" class="font-bold text-yellow-400">0</span></p>
+            <div id="suggestion-display" class="overflow-y-auto flex-grow">
+                <!-- Suggestion links will be generated here by JS -->
             </div>
-            <div id="shop-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
         </div>
     </div>
-    <div id="markets-modal" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50">
-        <div class="bg-telegram-secondary rounded-2xl shadow-2xl p-6 w-full max-w-lg">
-             <div class="flex justify-between items-center mb-4">
-                <h2 class="text-2xl font-bold text-purple-400">Unlock Markets</h2>
-                <button id="close-markets-btn" class="text-gray-400 hover:text-white text-3xl font-bold">&times;</button>
+
+    <!-- Admission Form Modal -->
+    <div id="admission-modal" class="modal fixed inset-0 bg-black bg-opacity-70 z-50 hidden flex items-center justify-center p-4 opacity-0 pointer-events-none">
+        <div class="modal-content bg-gray-800 rounded-xl shadow-2xl w-full max-w-2xl max-h-full overflow-y-auto p-8 transform scale-95">
+            <button class="modal-close absolute top-4 right-4 text-gray-400 hover:text-white text-3xl">&times;</button>
+            <div class="text-center mb-6">
+                <h2 class="text-3xl font-bold text-white">ভর্তি <span class="gradient-text">ফর্ম</span></h2>
+                <p class="text-gray-400 mt-2">আপনার তথ্য দিয়ে ফর্মটি পূরণ করুন</p>
             </div>
-            <div id="markets-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 max-h-[60vh] overflow-y-auto"></div>
+            <form id="admission-form" novalidate>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <input class="form-input bg-gray-700 border border-gray-600 rounded-lg p-3 text-white w-full focus:outline-none" type="text" name="StudentName" placeholder="শিক্ষার্থীর নাম" required>
+                    <input class="form-input bg-gray-700 border border-gray-600 rounded-lg p-3 text-white w-full focus:outline-none" type="text" name="GuardianName" placeholder="অভিভাবকের নাম" required>
+                    
+                    <div class="form-input flex items-center bg-gray-700 border border-gray-600 rounded-lg w-full">
+                        <span class="text-gray-400 pl-3">+880</span>
+                        <input class="bg-transparent p-3 text-white w-full focus:outline-none" type="tel" name="student_mobile_10_digit" placeholder="1xxxxxxxxx" required maxlength="10" pattern="\d{10}">
+                    </div>
+                    <div class="form-input flex items-center bg-gray-700 border border-gray-600 rounded-lg w-full">
+                        <span class="text-gray-400 pl-3">+880</span>
+                        <input class="bg-transparent p-3 text-white w-full focus:outline-none" type="tel" name="guardian_mobile_10_digit" placeholder="1xxxxxxxxx" required maxlength="10" pattern="\d{10}">
+                    </div>
+                    
+                    <select id="curriculum-select" name="Curriculum" class="form-input bg-gray-700 border border-gray-600 rounded-lg p-3 text-white w-full focus:outline-none" required>
+                        <option value="">-- কারিকুলাম নির্বাচন করুন --</option>
+                        <option value="School">স্কুল</option>
+                        <option value="Madrasha">মাদ্রাসা</option>
+                    </select>
+                    <select id="class-select" name="Class" class="form-input bg-gray-700 border border-gray-600 rounded-lg p-3 text-white w-full focus:outline-none" required>
+                        <option value="">-- ক্লাস নির্বাচন করুন --</option>
+                    </select>
+                </div>
+                <div class="mt-4">
+                    <label class="text-gray-400">বিষয়সমূহ নির্বাচন করুন:</label>
+                    <div id="subject-checkboxes-container" class="mt-2 grid grid-cols-2 md:grid-cols-3 gap-2 max-h-40 overflow-y-auto bg-gray-900/50 p-2 rounded-lg">
+                        <!-- Subject checkboxes will be populated here -->
+                    </div>
+                </div>
+                <input type="hidden" name="StudentMobile">
+                <input type="hidden" name="GuardianMobile">
+                <input type="hidden" name="Subject">
+                <input type="hidden" name="Username">
+                <input type="hidden" name="Password">
+                <div class="mt-6 text-center">
+                    <p id="admission-fee-display" class="text-lg text-yellow-400"></p>
+                    <div id="monthly-fee-display" class="text-xl text-white font-bold mt-2 h-8"></div>
+                </div>
+                <div class="mt-4">
+                    <p class="text-xs text-center text-gray-400">*** বিঃ দ্রঃ ফর্ম সাবমিট করার পর রসিদটি প্রিন্ট অথবা ডাউনলোড করে সংরক্ষণ করুন। ***</p>
+                </div>
+                <div class="mt-6">
+                    <button type="submit" id="submit-btn" class="w-full bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold py-3 px-4 rounded-lg transition duration-300">ফর্ম সাবমিট করুন</button>
+                </div>
+                <div id="form-status" class="mt-4 text-center h-6"></div>
+            </form>
         </div>
     </div>
-    <div id="ranking-modal" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50">
-        <div class="bg-telegram-secondary rounded-2xl shadow-2xl p-6 w-full max-w-sm">
-            <div class="flex justify-between items-center mb-4">
-                <h2 class="text-2xl font-bold text-yellow-400">Corporate Ranks</h2>
-                <button id="close-ranking-btn" class="text-gray-400 hover:text-white text-3xl font-bold">&times;</button>
+    
+    <!-- Login Modal -->
+    <div id="login-modal" class="modal fixed inset-0 bg-black bg-opacity-70 z-[70] hidden flex items-center justify-center p-4 opacity-0 pointer-events-none">
+        <div class="modal-content bg-gray-800 rounded-xl shadow-2xl w-full max-w-sm p-8 transform scale-95">
+            <button class="modal-close absolute top-4 right-4 text-gray-400 hover:text-white text-3xl">&times;</button>
+            <div class="text-center mb-6">
+                <h2 class="text-3xl font-bold text-white"><span class="gradient-text">লগইন</span> করুন</h2>
             </div>
-            <ul id="league-list" class="space-y-2 max-h-[60vh] overflow-y-auto pr-2"></ul>
+            <form id="login-form">
+                <div class="space-y-4">
+                    <input class="form-input bg-gray-700 border border-gray-600 rounded-lg p-3 text-white w-full focus:outline-none" type="text" name="username" placeholder="ইউজারনেম" required>
+                    <input class="form-input bg-gray-700 border border-gray-600 rounded-lg p-3 text-white w-full focus:outline-none" type="password" name="password" placeholder="পাসওয়ার্ড" required>
+                </div>
+                <div class="mt-6">
+                    <button type="submit" id="login-submit-btn" class="w-full bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold py-3 px-4 rounded-lg transition duration-300">
+                        লগইন
+                    </button>
+                </div>
+                <div id="login-status" class="mt-4 text-center h-6"></div>
+            </form>
         </div>
     </div>
+
+    <!-- Notice Modal for Protected Links -->
+    <div id="notice-modal" class="modal fixed inset-0 bg-black bg-opacity-70 z-[80] hidden flex items-center justify-center p-4 opacity-0 pointer-events-none">
+        <div class="modal-content bg-gray-800 rounded-xl shadow-2xl w-full max-w-md p-8 transform scale-95 text-center">
+            <button class="modal-close absolute top-4 right-4 text-gray-400 hover:text-white text-3xl">&times;</button>
+            <i class="fas fa-exclamation-triangle text-yellow-400 text-5xl mb-4"></i>
+            <h2 class="text-2xl font-bold text-white mb-2">দৃষ্টি আকর্ষণ</h2>
+            <p class="text-gray-300">এই কন্টেন্টটি শুধুমাত্র আমাদের নিবন্ধিত শিক্ষার্থীদের জন্য। সম্পূর্ণ সুবিধা পেতে অনুগ্রহ করে ভর্তি হয়ে আপনার ইউজার আইডি ও পাসওয়ার্ড সংগ্রহ করুন।</p>
+        </div>
+    </div>
+
+    <!-- Receipt Modal -->
+    <div id="receipt-modal" class="modal fixed inset-0 bg-black bg-opacity-70 z-[90] hidden flex items-center justify-center p-4 opacity-0 pointer-events-none">
+        <div class="modal-content bg-gray-800 rounded-xl shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col transform scale-95">
+            <div class="p-6 flex-shrink-0 flex justify-between items-center">
+                 <h2 class="text-2xl font-bold text-white">ভর্তি <span class="gradient-text">রসিদ</span></h2>
+                 <div>
+                    <button id="print-receipt-btn" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg transition duration-300 mr-2"><i class="fas fa-print mr-2"></i>প্রিন্ট</button>
+                    <button id="download-receipt-btn" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg transition duration-300"><i class="fas fa-download mr-2"></i>ডাউনলোড</button>
+                 </div>
+                 <button class="modal-close text-gray-400 hover:text-white text-3xl">&times;</button>
+            </div>
+            <div class="overflow-y-auto p-2">
+                <div id="receipt-content" class="bg-white text-gray-800 p-8" style="width: 210mm; min-height: 297mm; margin: auto;">
+                    <!-- Receipt content will be populated by JS -->
+                </div>
+            </div>
+        </div>
+    </div>
+
 
     <script>
-        // --- DOM Elements ---
-        const diamondDisplayTop = document.getElementById('diamond-display-top');
-        const scoreDisplayMain = document.getElementById('score-display-main');
-        const profitDisplay = document.getElementById('profit-display');
-        const hamsterButton = document.getElementById('hamster-button');
-        const clickArea = document.getElementById('click-area');
-        const energyDisplay = document.getElementById('energy-display');
-        const energyBar = document.getElementById('energy-bar');
-        const energyRegenRateSpan = document.getElementById('energy-regen-rate');
-        const leagueBadge = document.getElementById('league-badge');
-        const upgradeTapBtn = document.getElementById('upgrade-tap-btn');
-        const tapUpgradeCostSpan = document.getElementById('tap-upgrade-cost');
-        const boostEnergyBtn = document.getElementById('boost-energy-btn');
-        const boostEnergyCostSpan = document.getElementById('boost-energy-cost');
-        const energyRefillBtn = document.getElementById('energy-refill-btn');
-        const energyRefillCostSpan = document.getElementById('energy-refill-cost');
-        const playerNameDisplay = document.getElementById('player-name-display');
+        // --- Configuration ---
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwECMruCNtXhGGJiz8ZRnhXKw_Zr1zHQxuCxPD6vxx3aA91eZr1asvFElRsNoajhhK0/exec';
+        // !!! QR Code chobir URL ekhane din !!!
+        const QR_CODE_URL = 'https://placehold.co/96x96/cccccc/000000?text=QR+Code';
         
-        // Modal Elements
-        const registrationModal = document.getElementById('registration-modal');
-        const playerNameInput = document.getElementById('player-name-input');
-        const playerUsernameInput = document.getElementById('player-username-input');
-        const playerAgeInput = document.getElementById('player-age-input');
-        const startGameBtn = document.getElementById('start-game-btn');
-        const regError = document.getElementById('reg-error');
-        const rankUpModal = document.getElementById('rank-up-modal');
-        const newRankNameSpan = document.getElementById('new-rank-name');
-        const closeRankUpBtn = document.getElementById('close-rank-up-btn');
-        const rankingBtn = document.getElementById('ranking-btn');
-        const rankingModal = document.getElementById('ranking-modal');
-        const closeRankingBtn = document.getElementById('close-ranking-btn');
-        const leagueList = document.getElementById('league-list');
-        const marketsBtn = document.getElementById('markets-btn');
-        const marketsModal = document.getElementById('markets-modal');
-        const closeMarketsBtn = document.getElementById('close-markets-btn');
-        const marketsGrid = document.getElementById('markets-grid');
-        const shopBtn = document.getElementById('shop-btn');
-        const shopModal = document.getElementById('shop-modal');
-        const closeShopBtn = document.getElementById('close-shop-btn');
-        const shopGrid = document.getElementById('shop-grid');
-        const diamondBalanceShop = document.getElementById('diamond-balance-shop');
-        const offlineEarningsModal = document.getElementById('offline-earnings-modal');
-        const offlinePlayerName = document.getElementById('offline-player-name');
-        const offlineEarningsDisplay = document.getElementById('offline-earnings-display');
-        const closeOfflineBtn = document.getElementById('close-offline-btn');
-        const offlineTimeBtn = document.getElementById('offline-time-btn');
-        const offlineTimeModal = document.getElementById('offline-time-modal');
-        const closeOfflineTimeBtn = document.getElementById('close-offline-time-btn');
-        const offlineTimeGrid = document.getElementById('offline-time-grid');
-        const currentOfflineTimeSpan = document.getElementById('current-offline-time');
-        const friendsBtn = document.getElementById('friends-btn');
-        const friendsModal = document.getElementById('friends-modal');
-        const closeFriendsBtn = document.getElementById('close-friends-btn');
-        const referralCodeInput = document.getElementById('referral-code-input');
-        const submitReferralBtn = document.getElementById('submit-referral-btn');
-        const referralError = document.getElementById('referral-error');
-        const referralSuccessModal = document.getElementById('referral-success-modal');
-        const closeReferralSuccessBtn = document.getElementById('close-referral-success-btn');
-        const referralSection = document.getElementById('referral-section');
-        const referralBonusText = document.getElementById('referral-bonus-text');
-        const inviteCodeDisplay = document.getElementById('invite-code-display');
-        const inviteCodeText = document.getElementById('invite-code-text');
-        const inviteCodeCopyMessage = document.getElementById('invite-code-copy-message');
-        const moreBtn = document.getElementById('more-btn');
-        const moreModal = document.getElementById('more-modal');
-        const moreModalContent = document.getElementById('more-modal-content');
-        const closeMoreBtn = document.getElementById('close-more-btn');
-
-        // --- Game State Variables ---
-        let gameState = {
-            playerName: null, playerUsername: null, playerAge: null,
-            coins: 0, diamonds: 0, profitPerHour: 0, energy: 1000, maxEnergy: 1000,
-            coinsPerTap: 1, tapUpgradeCost: 100, boostEnergyCost: 200, currentLeagueIndex: 0,
-            markets: [], lastVisit: Date.now(), energyRegenRate: 1, energyRefillCost: 500,
-            maxOfflineTime: 3 * 60 * 60 * 1000, offlineUpgradesPurchased: [],
-            claimedReferralCodes: [],
-            claimedInviteCode: false
+        // Global cache for dynamic data from Google Sheet
+        let dynamicDataCache = null;
+        let preventExit = false;
+        
+        const staticClasses = {
+            School: ['Class 2', 'Class 3', 'Class 4', 'Class 5', 'Class 6', 'Class 7', 'Class 8', 'Class 9 (Science)', 'Class 9 (Arts)', 'Class 9 (Commerce)', 'Class 10 (Science)', 'Class 10 (Arts)', 'Class 10 (Commerce)', 'Class 11 (Science)', 'Class 11 (Arts)', 'Class 11 (Commerce)', 'Class 12 (Science)', 'Class 12 (Arts)', 'Class 12 (Commerce)'],
+            Madrasha: ['Class 2', 'Class 3', 'Class 4', 'Class 5', 'Dakhil 6', 'Dakhil 7', 'Dakhil 8', 'Dakhil 9', 'Dakhil 10', 'Alim 1st Year', 'Alim 2nd Year']
         };
 
-        // --- Configs ---
-        const rankNames = [ "Intern", "Trainee", "Apprentice", "Office Clerk", "Data Entry Clerk", "Administrative Assistant", "Technician", "Customer Service Representative", "Sales Representative", "Junior Associate", "Junior Analyst", "Junior Developer", "Assistant", "Coordinator", "Executive (Entry-Level)", "Support Staff", "Field Officer", "Technician II", "Associate", "Analyst", "Developer", "Engineer", "Specialist", "Consultant", "Team Lead", "Supervisor", "Senior Associate", "Senior Analyst", "Senior Developer", "Senior Engineer", "Project Manager", "Product Manager", "Program Manager", "Operations Manager", "HR Manager", "Finance Manager", "Marketing Manager", "Sales Manager", "Business Development Manager", "General Manager", "Senior Manager", "Director", "Regional Director", "Associate Director", "Senior Director", "Vice President (VP)", "Senior Vice President (SVP)", "Executive Vice President (EVP)", "Managing Director", "Country Manager", "Chief Operating Officer (COO)", "Chief Technology Officer (CTO)", "Chief Marketing Officer (CMO)", "Chief Financial Officer (CFO)", "Chief Human Resources Officer (CHRO)", "Chief Information Officer (CIO)", "Chief Strategy Officer (CSO)", "Chief Executive Officer (CEO)", "Co-Founder", "Founder / Owner" ];
-        const leagues = [];
-
-        const cityNames = ["Tokyo", "London", "New York", "Paris", "Singapore", "Dubai", "Hong Kong", "Sydney", "Zurich", "Los Angeles", "Shanghai", "Toronto", "Seoul", "Berlin", "Amsterdam", "Mumbai", "Moscow", "Beijing", "Madrid", "Rome", "Bangkok", "Istanbul", "Jakarta", "Cairo", "Buenos Aires", "Mexico City", "São Paulo", "Lagos", "Karachi", "Dhaka", "Manila", "Rio de Janeiro", "Chicago", "San Francisco", "Washington D.C.", "Boston", "Miami", "Houston", "Dallas", "Atlanta", "Philadelphia", "Phoenix", "Seattle", "Denver", "Vancouver", "Montreal", "Lima", "Bogotá", "Santiago", "Caracas", "Havana", "Kingston", "Lisbon", "Dublin", "Brussels", "Vienna", "Prague", "Warsaw", "Budapest", "Athens", "Helsinki", "Oslo", "Stockholm", "Copenhagen", "Riyadh", "Doha", "Abu Dhabi", "Kuwait City", "Tel Aviv", "Ankara", "Nairobi", "Johannesburg", "Cape Town", "Accra", "Dakar", "Casablanca", "Algiers", "Tunis", "Kuala Lumpur", "Ho Chi Minh City", "Hanoi", "Phnom Penh", "Yangon", "Taipei", "Kolkata", "Chennai", "Bangalore", "Hyderabad", "Pune", "Ahmedabad", "Surat", "Jaipur", "Cebu City", "Perth", "Melbourne", "Auckland", "Wellington", "Christchurch", "Honolulu", "Chittagong", "Satkania"];
-        const specialItemNames = [ "iPhone", "Samsung Galaxy", "Google Pixel", "OnePlus", "Xiaomi", "Huawei", "Tesla", "Ferrari", "Lamborghini", "Bugatti", "Rolls-Royce", "Porsche", "Ducati", "Harley-Davidson", "Kawasaki Ninja", "BMW S1000RR", "Yamaha R1", "Apple", "Google", "Amazon", "Microsoft", "Meta", "Nike", "Adidas", "Gucci", "Louis Vuitton", "NVIDIA RTX 4090", "AMD Ryzen 9", "Intel Core i9", "MacBook Pro", "Alienware PC", "Razer Blade", "Oculus Quest 3", "Valve Index", "DJI Drone", "GoPro Hero 12", "Sony A7 IV", "Canon EOS R5", "Bose Headphones", "Sennheiser Orpheus", "Devialet Phantom", "Nintendo Switch", "PlayStation 5", "Xbox Series X", "Steam Deck", "Logitech G Pro", "Corsair K100", "Herman Miller Chair", "Leica Camera", "Hasselblad Camera", "Rolex Daytona", "Patek Philippe Nautilus", "Audemars Piguet Royal Oak", "Richard Mille", "Jacob & Co.", "Cartier Love Bracelet", "Tiffany & Co. Diamond", "Hermès Birkin Bag", "Chanel No. 5", "Prada", "Versace", "Fendi", "Balenciaga", "Supreme Bogo", "Off-White Dunks", "Yeezy Boost 350", "Air Jordans", "Loro Piana", "Brunello Cucinelli", "Tom Ford Suit", "Savile Row Suit", "Graff Diamond", "Harry Winston", "Van Cleef & Arpels", "Koenigsegg Jesko", "Pagani Huayra", "McLaren P1", "Aston Martin Valkyrie", "Mercedes-AMG One", "Lexus LFA", "Maserati MC20", "Bentley Continental GT", "Maybach S-Class", "Ford GT", "Dodge Demon", "Jeep Wrangler", "G-Wagon", "Rivian R1T", "Burj Khalifa Penthouse", "Monaco Penthouse", "NYC Penthouse", "London Townhouse", "Beverly Hills Mansion", "Aspen Ski Chalet", "Maldives Overwater Villa", "The Eiffel Tower", "The Statue of Liberty", "The Colosseum", "Machu Picchu", "The Great Wall of China", "The Pyramids of Giza", "The Louvre", "Neuschwanstein Castle", "Dom Pérignon", "Screaming Eagle Cabernet", "Kopi Luwak Coffee", "Almas Caviar", "White Truffles", "Wagyu Beef", "Michelin Star Meal", "Gordon Ramsay Restaurant", "Noma Reservation", "Mona Lisa", "The Starry Night", "Original Star Wars Script", "First Edition Harry Potter", "Action Comics #1", "Black Lotus (MTG)", "Charizard 1st Edition", "A Banksy Original", "A Picasso Original", "Hamilton Tickets", "Private Island", "Racehorse", "Antique Stradivarius Violin", "First Class Round-the-World Ticket", "VIP Concert Pass", "Super Bowl Rings", "Olympic Gold Medal", "Nobel Prize", "Academy Award", "World Cup Trophy", "SpaceX Starship Ticket", "Blue Origin Flight", "Virgin Galactic Flight", "A Meteorite Fragment", "Dinosaur Fossil", "Moon Rock", "Mars Rock", "Signed Beatles Album", "Original Shakespeare Folio", "Gutenberg Bible Page", "Dead Sea Scroll Fragment", "Enigma Machine", "Apollo Guidance Computer", "First Apple I Computer", "A plot of land on the Moon", "A plot of land on Mars", "Your own Vineyard in France", "A Scottish Castle", "A Japanese Ryokan", "A Swiss Bank Account", "A Fleet of Delivery Drones", "A Personal Chef", "A Butler", "A Personal Stylist", "A Personal Trainer", "A Lifetime Supply of Pizza", "A Lifetime Supply of Coffee", "A Seat on the Board of a Major Corp", "A Key to the City", "Diplomatic Immunity", "A Pardon for a Future Crime", "The Secret to Cold Fusion", "Proof of Alien Life", "The Location of Atlantis", "The Ark of the Covenant", "A Jet Ski", "A Snowmobile", "A Luxury RV", "A Sailboat", "A Hot Air Balloon", "A Personal Submarine", "A Professional Sports Team", "A Film Studio", "A TV Network", "A Newspaper", "A Magazine", "A Popular Blog", "A Viral YouTube Channel", "A Chart-Topping Podcast", "A Bestselling Novel", "A Pulitzer Prize", "A Fields Medal", "A Turing Award", "An EGOT (Emmy, Grammy, Oscar, Tony)", "A Knighthood", "A Royal Title", "Your Own Coat of Arms", "A Private Detective Agency", "A Security Firm", "A PMC (Private Military Company)", "An Island Fortress", "A Mountain Retreat", "A Desert Oasis", "An Arctic Research Station", "A Tropical Research Lab", "A Personal Satellite Network", "A Global Fiber Optic Network", "Your Own Social Media Platform", "A Search Engine to Rival Google", "A Cryptocurrency That Actually Works", "A Self-Sustaining Mars Colony", "A Generation Ship", "A Terraforming Machine", "A Weather Control Satellite", "A Force Field Generator", "A Cloaking Device", "A Working Teleporter", "A Time Travel Device", "A Replicator (Star Trek style)", "A Holodeck", "A Sentient AI Companion", "A Super Soldier Serum", "A Power Ring (Green Lantern style)", "A Symbiote Suit (Venom style)", "The Speed Force", "Adamantium Skeleton", "Vibranium Weave Suit", "The Batcave", "The Fortress of Solitude", "Stark Tower", "The Xavier School for Gifted Youngsters", "Hogwarts Castle", "The Death Star plans", "The One Ring", "An Elder Wand", "A Dragon Egg", "A Phoenix", "A Griffin", "A Hippogriff", "A Basilisk", "A Kraken", "A Hydra", "A Cerberus", "A Pegasus", "A Unicorn", "A Manticore", "A Chimera", "The Golden Fleece", "The Trident of Poseidon", "Zeus's Master Bolt", "Hades's Helm of Darkness", "Hermes's Winged Sandals", "Apollo's Lyre", "Artemis's Bow", "Hephaestus's Forge", "Aphrodite's Girdle", "A Box from Pandora (unopened, hopefully)", "The Gordian Knot (untied)", "The Sword of Damocles", "The Trojan Horse (miniature)", "The Library of Alexandria (in a snow globe)", "The Hanging Gardens of Babylon (bonsai)" ];
-        const premiumItemNames = [
-    "Web Agency", "Crypto Farm", "AI Startup", "Luxury Hotel", "Private Jet", "Yacht", "Skyscraper", "Movie Studio", "Record Label",
-    "Video Game Company", "Fashion Brand", "Restaurant Chain", "Supercar Fleet", "Art Gallery", "Vineyard", "Hedge Fund", "Venture Capital Firm",
-    "Private Island", "Space Tourism Ticket", "Robot Butler", "Hologram Projector", "Flying Car", "Exosuit", "Cybernetic Pet",
-    "Personal Satellite", "VR World", "Gene-Editing Lab", "Quantum Computer", "Asteroid Mine", "Moon Base", "Dyson Sphere Fragment",
-    "Interstellar Probe", "Starship", "Teleportation Device", "Time Machine", "Sentient AI", "Galactic Franchise", "Alien Artifact",
-    "Parallel Universe Portal", "Immortality Serum", "Reality Glitch", "4th Wall Awareness", "Plot Armor", "Narrative Control", "The Multiverse",
-    "Nanotech Factory", "Sentient Ship", "Dyson Swarm", "Wormhole Stabilizer", "Stargate", "Cloned Dinosaur Park", "Android Army", "Mars Terraformer",
-    "Asteroid Belt Claim", "Fusion Power Plant", "Time Dilation Field", "Subspace Comm Network", "Personal Force Field", "Anti-Gravity Vehicle", "Sentient Planet",
-    "AI Oracle", "Galactic Encyclopedia", "Neural Lace", "Simulation Universe", "Matter Replicator", "Star Forge", "Global Conglomerate", "Off-world Corporation",
-    "Interstellar Trade Route", "Cryptocurrency Exchange", "Patent Troll Empire", "Automated Luxury Communism", "Corporate Espionage Firm", "Private Military Contractor", "Shadow Bank",
-    "Global Logistics Network", "AI-Managed Hedge Fund", "Space Elevator", "Deep Sea Mining Operation", "Gene-Sequencing Monopoly", "Neural Advertising Network", "Private Archipelago",
-    "Flying Superyacht", "Volcano Lair", "Underwater City", "Personal Moon", "Collection of Famous Art", "F1 Racing Team", "Solid Gold Airplane",
-    "Immortality Clinic", "Designer DNA", "Private Symphony Orchestra", "Zero-G Casino", "Space Hotel Chain", "Custom-Built Planet", "Extinct Animal Zoo",
-    "Philosopher's Stone", "Fountain of Youth", "Holy Grail", "Dragon's Hoard", "Magic Academy", "Griffin Ranch", "Elven Kingdom Deed", "Vampire Coven",
-    "Ring of Power", "Potion of Luck", "Library of Alexandria (Restored)", "Amulet of Invisibility", "A Genie's Lamp", "Phoenix Feather", "Unicorn Sanctuary",
-    "Control of the Narrative", "Copyright on a Color", "Patent on a Number", "Fourth-Wall Breaker", "Plot Device", "Deus Ex Machina", "The Meaning of Life",
-    "The Ultimate Question", "The Answer (42)", "A Sense of Purpose", "Perpetual Motion Machine", "Universal Language", "The Source Code", "A Good Sequel",
-    "The Final Boss Key", "Weather Control Machine", "Artificial Sun", "Ocean Colonization", "Underground Civilization", "Global Consciousness Link", "Dream Weaving Tech",
-    "Memory Marketplace", "Personal Black Hole", "Pocket Dimension", "Controlling Interest in Gravity", "CEO of the Internet", "Airspace Ownership", "Soundtrack of Your Life",
-    "Gourmet Food Synthesizer", "Instant Skill Upload", "Cryosleep Chamber Network", "Personal Propaganda Machine", "History Rewriter", "Loyal Robot Sidekick", "Self-Building Skyscraper",
-    "AI Legal Team", "Automated Political Lobbying", "Interdimensional Cable TV", "Exoplanet Real Estate", "Nebula in a Bottle", "Controlling Share of the Moon",
-    "Private Spy Network", "Asteroid Redirection System", "Personalized Climate Bubble", "Anti-Aging Nanites", "Telepathic Communication Implant", "Bio-Engineered Dragon",
-    "Fleet of Submarines", "Self-Replicating Minefield", "Controlling Stake in Antarctica", "The World's Coffee Supply", "Global Wi-Fi", "A Key to Every Door",
-    "The Concept of 'Cool'", "A Lost Symphony", "The Last Dodo", "A Mammoth Clone", "A Real T-Rex", "Atlantis", "El Dorado", "Valhalla Access Pass",
-    "Mount Olympus Penthouse", "Controlling Interest in a Meme", "The Perfect Joke", "An Extra Hour in the Day", "The Cure for Hiccups", "A Rewind Button for Conversations",
-    "Never-Ending Pizza Box", "Self-Refilling Coffee Mug", "A Dog That Laughs", "A Cat That Does Your Taxes", "A Squirrel Secret Agent", "A Flying Pig",
-    "The Loch Ness Monster", "Bigfoot's Phone Number", "Area 51 Visitor Pass", "A Ride on Air Force One", "A Weekend at the White House", "Dinner with the Queen",
-    "A Personal Paparazzi Team", "Your Own Papal Bull", "A Country Named After You", "Your Face on a Coin", "A Mountain Carved in Your Likeness", "A Star Named After You",
-    "A Constellation in Your Shape", "The Title of 'Galactic Emperor'", "A Seat on the Intergalactic Council", "The Deed to a Black Hole", "A Supernova on Demand", "A Nebula as a Screensaver",
-    "A Pet Star", "A Moon That Sings", "A Planet Made of Diamond", "A River of Chocolate", "A Forest of Candy Canes", "A Popcorn Cloud",
-
-    "A Self-Driving Couch", "A Fridge That Restocks Itself", "A Wardrobe That Chooses Your Outfits", "A Bed That Makes Itself", "A House That Cleans Itself", "A Car That Finds Parking",
-    "A Jetpack That Runs on Coffee", "A Submarine That Serves Sushi", "A Blimp With a Hot Tub", "An RV With a Bowling Alley", "A Treehouse With an Elevator", "An Igloo With Central Heating",
-    "A Castle With a Moat of Soda", "A Spaceship With a Sunroof", "A Time Machine With Cup Holders", "A Portal Gun With Free Shipping", "The Batmobile", "The DeLorean",
-    "The TARDIS", "The Millennium Falcon", "The Starship Enterprise", "A Hoverboard", "A Lightsaber", "A Sonic Screwdriver", "A Set of Power Armor", "A Mech Suit",
-    "An Iron Man Suit", "Captain America's Shield", "Thor's Hammer", "Hulk's Pants", "Infinity Gauntlet", "A Working Magic Wand", "An Invisibility Cloak", "A Flying Broomstick",
-    "A Crystal Ball", "A Deck of Many Things", "A Bag of Holding", "A Vorpal Sword", "Excalibur", "Gungnir", "The Spear of Destiny", "The Ark of the Covenant",
-    "The Holy Hand Grenade", "A Can of Whoop-Ass", "A Barrel of Laughs", "A Box of Chocolates (You know what you're gonna get)", "A Get-Out-of-Jail-Free Card", "A Monopoly on Boardwalk",
-    "The deed to Park Place", "A Casino Empire", "A Global Media Empire", "An International Restaurant Conglomerate", "A Private Space Agency", "An Orbital Weapons Platform",
-    "A Fleet of Drones", "An Army of Lawyers", "A Legion of Accountants", "A Horde of Interns", "A Global Fan Club", "A Personal Biographer",
-    "A Documentary Series About You", "A Hollywood Movie of Your Life", "A Broadway Musical About Your Rise to Power", "A Hit Single About Your Awesomeness", "A Line of Action Figures", "A Cereal Named After You",
-    "A Holiday in Your Honor", "A Religion Based on Your Tweets", "A Cult Following", "A Secret Society", "The Illuminati (You're the Grand Master)", "The Stonecutters",
-    "The League of Shadows", "A Lair in a Volcano", "A Fortress of Solitude", "A Secret Underwater Base", "A Floating City", "An Airship Armada", "A Moon Laser",
-    "A Death Star (fully operational)", "A Planet Killer", "A Sun Crusher", "A Reality Bomb", "The Ultimate Nullifier", "A Cosmic Cube", "The Heart of the Universe"
-];
-        const shopItems = [ { id: 1, cost: 1000, reward: 10 }, { id: 2, cost: 10000, reward: 100 }, { id: 3, cost: 100000, reward: 500 }, { id: 4, cost: 1000000, reward: 1000 } ];
-        const offlineShopItems = [
-            { id: 1, cost: 1000, duration: 10 * 60 * 1000, label: "+10 Min" },
-            { id: 2, cost: 5000, duration: 60 * 60 * 1000, label: "+1 Hour" },
-            { id: 3, cost: 10000, duration: 130 * 60 * 1000, label: "+2h 10m" },
-            { id: 4, cost: 20000, duration: 250 * 60 * 1000, label: "+4h 10m" },
-        ];
-        const referralCodes = {
-            "TapTap121": 20000, "TapTap1413": 15000, "TapTap1715": 25000,
-            "TapTap1433": 20000, "TapTap2523": 15000, "TapTap2345": 30000,
-            "TapTap2357": 20000, "TapTap7809": 30000, "TapTap2435": 20000,
-            "TapTap0976": 25000, "TapTap5934": 30000, "TapTap0543": 25000,
-            "TapTap5679": 20000, "TapTap1985": 25000, "TapTap2823": 15000,
-            "TapTap0128": 25000, "TapTap8394": 30000, "TapTap2398": 20000
+        const staticSubjects = {
+            School: {
+                'Class 2': ['বাংলা', 'ইংরেজি', 'গণিত'], 'Class 3': ['বাংলা', 'ইংরেজি', 'গণিত'], 'Class 4': ['বাংলা', 'ইংরেজি', 'গণিত', 'বিজ্ঞান'], 'Class 5': ['বাংলা', 'ইংরেজি', 'গণিত', 'বিজ্ঞান'], 'Class 6': ['বাংলা', 'ইংরেজি', 'গণিত', 'বিজ্ঞান'], 'Class 7': ['বাংলা', 'ইংরেজি', 'গণিত', 'বিজ্ঞান'], 'Class 8': ['বাংলা', 'ইংরেজি', 'গণিত', 'বিজ্ঞান'],
+                'Class 9 (Science)': ['বাংলা', 'ইংরেজি', 'গণিত', 'ICT', 'পদার্থবিজ্ঞান', 'রসায়ন', 'উচ্চতর গণিত', 'জীববিজ্ঞান'], 'Class 9 (Arts)': ['বাংলা', 'ইংরেজি', 'গণিত', 'ICT', 'ভূগোল', 'ইতিহাস', 'পৌরনীতি'], 'Class 9 (Commerce)': ['বাংলা', 'ইংরেজি', 'গণিত', 'ICT', 'হিসাববিজ্ঞান', 'ফিন্যান্স', 'ব্যবসায় উদ্যোগ'],
+                'Class 10 (Science)': ['বাংলা', 'ইংরেজি', 'গণিত', 'ICT', 'পদার্থবিজ্ঞান', 'রসায়ন', 'উচ্চতর গণিত', 'জীববিজ্ঞান'], 'Class 10 (Arts)': ['বাংলা', 'ইংরেজি', 'গণিত', 'ICT', 'ভূগোল', 'ইতিহাস', 'পৌরনীতি'], 'Class 10 (Commerce)': ['বাংলা', 'ইংরেজি', 'গণিত', 'ICT', 'হিসাববিজ্ঞান', 'ফিন্যান্স', 'ব্যবসায় উদ্যোগ'],
+                'Class 11 (Science)': ['বাংলা', 'ইংরেজি', 'ICT', 'পদার্থবিজ্ঞান', 'রসায়ন', 'উচ্চতর গণিত', 'জীববিজ্ঞান'], 'Class 11 (Arts)': ['বাংলা', 'ইংরেজি', 'ICT', 'যুক্তিবিদ্যা', 'অর্থনীতি', 'সমাজবিজ্ঞান'], 'Class 11 (Commerce)': ['বাংলা', 'ইংরেজি', 'ICT', 'হিসাববিজ্ঞান', 'ব্যবস্থাপনা', 'উৎপাদন'],
+                'Class 12 (Science)': ['বাংলা', 'ইংরেজি', 'ICT', 'পদার্থবিজ্ঞান', 'রসায়ন', 'উচ্চতর গণিত', 'জীববিজ্ঞান'], 'Class 12 (Arts)': ['বাংলা', 'ইংরেজি', 'ICT', 'যুক্তিবিদ্যা', 'অর্থনীতি', 'সমাজবিজ্ঞান'], 'Class 12 (Commerce)': ['বাংলা', 'ইংরেজি', 'ICT', 'হিসাববিজ্ঞান', 'ব্যবস্থাপনা', 'উৎপাদন']
+            },
+            Madrasha: {
+                'Class 2': ['আরবি', 'কুরআন'], 'Class 3': ['আরবি', 'কুরআন'], 'Class 4': ['ফিকহ', 'আকাইদ'], 'Class 5': ['ফিকহ', 'আকাইদ'],
+                'Dakhil 6': ['কুরআন', 'হাদিস', 'আরবি ১ম', 'আরবি ২য়', 'ফিকহ', 'আকাইদ', 'বাংলা', 'ইংরেজি', 'গণিত', 'বিজ্ঞান', 'আইসিটি'],
+                'Dakhil 7': ['কুরআন', 'হাদিস', 'আরবি ১ম', 'আরবি ২য়', 'ফিকহ', 'আকাইদ', 'বাংলা', 'ইংরেজি', 'গণিত', 'বিজ্ঞান', 'আইসিটি'],
+                'Dakhil 8': ['কুরআন', 'হাদিস', 'আরবি ১ম', 'আরবি ২য়', 'ফিকহ', 'আকাইদ', 'বাংলা', 'ইংরেজি', 'গণিত', 'বিজ্ঞান', 'আইসিটি'],
+                'Dakhil 9': ['কুরআন', 'হাদিস', 'আরবি ১ম', 'আরবি ২য়', 'ফিকহ ও উসুল', 'বাংলা', 'ইংরেজি', 'গণিত', 'আইসিটি'],
+                'Dakhil 10': ['কুরআন', 'হাদিস', 'আরবি ১ম', 'আরবি ২য়', 'ফিকহ ও উসুল', 'বাংলা', 'ইংরেজি', 'গণিত', 'আইসিটি'],
+                'Alim 1st Year': ['কুরআন', 'হাদিস', 'আরবি', 'ফিকহ', 'বাংলা', 'ইংরেজি', 'আইসিটি', 'বালাগাত ও মানতিক'],
+                'Alim 2nd Year': ['কুরআন', 'হাদিস', 'আরবি', 'ফিকহ', 'বাংলা', 'ইংরেজি', 'আইসিটি', 'বালাগাত ও মানতিক']
+            }
         };
-        const superReferralCodes = [
-            "TTsuper1872", "TTsuper1244", "TTsuper3563", "TTsuper1246", "TTsuper1356", 
-            "TTsuper7896", "TTsuper2827", "TTsuper8572", "TTsuper9034", "TTsuper7862", 
-            "TTsuper2081", "TTsuper4013", "TTsuper7439", "TTsuper1230", "TTsuper1807", 
-            "TTsuper5011", "TTsuper3899", "TTsuper0355", "TTsuper0045", "TTsuper1188"
-        ];
-        const diamondReferralCodes = [
-            "Diamond4729", "Diamond0384", "Diamond9167", "Diamond2051", "Diamond7642",
-            "Diamond3890", "Diamond1476", "Diamond6038", "Diamond8257", "Diamond4902",
-            "Diamond1583", "Diamond7310", "Diamond2995", "Diamond4078", "Diamond6701",
-            "Diamond8406", "Diamond3569", "Diamond9124", "Diamond2630", "Diamond7893"
-        ];
-        
-        function generateLeagues() {
-            let threshold = 0;
-            let profitBoost = 500;
-            const styleEl = document.createElement('style');
-            document.head.appendChild(styleEl);
-            const styleSheet = styleEl.sheet;
 
-            rankNames.forEach((name, index) => {
-                if (index > 0) {
-                    threshold = index < 10 ? threshold + (1000 * Math.pow(1.5, index)) : threshold * 1.8;
-                    profitBoost = index < 10 ? profitBoost + (500 * Math.pow(1.2, index)) : profitBoost * 1.5;
+        // --- Helper Functions ---
+        function openModal(modal) {
+            document.body.style.overflow = 'hidden';
+            modal.classList.remove('hidden', 'pointer-events-none');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                modal.querySelector('.modal-content').classList.remove('scale-95');
+            }, 10);
+        }
+
+        function closeModal(modal) {
+            document.body.style.overflow = 'auto';
+            modal.classList.add('opacity-0');
+            modal.querySelector('.modal-content').classList.add('scale-95');
+            setTimeout(() => {
+                modal.classList.add('hidden', 'pointer-events-none');
+            }, 300);
+        }
+        
+        function convertGoogleDriveLink(url) {
+            if (url && url.includes('drive.google.com/file/d/')) {
+                const fileId = url.split('/d/')[1].split('/')[0];
+                return `https://drive.google.com/uc?export=view&id=${fileId}`;
+            }
+            return url;
+        }
+
+        // --- UI Update Functions ---
+        function updateUIAfterLogin(studentName) {
+            const authSection = document.getElementById('auth-section');
+            const mobileAuthSection = document.getElementById('mobile-auth-section');
+            const welcomeMsg = `স্বাগতম, ${studentName.split(' ')[0]}`;
+            const logoutBtnHTML = `<a href="javascript:void(0)" id="logout-btn" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg transition duration-300">লগআউট</a>`;
+            
+            authSection.innerHTML = `<span class="mr-4">${welcomeMsg}</span> ${logoutBtnHTML}`;
+            mobileAuthSection.innerHTML = `<span class="block text-center py-2">${welcomeMsg}</span> <a href="javascript:void(0)" id="mobile-logout-btn" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg transition duration-300 w-full block text-center">লগআউট</a>`;
+            
+            document.getElementById('logout-btn').addEventListener('click', logoutUser);
+            document.getElementById('mobile-logout-btn').addEventListener('click', logoutUser);
+        }
+
+        function updateUIAfterLogout() {
+            const authSection = document.getElementById('auth-section');
+            const mobileAuthSection = document.getElementById('mobile-auth-section');
+            const loginBtnHTML = `<a href="javascript:void(0)" data-modal-target="login-modal" id="login-btn" class="modal-trigger bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold py-2 px-4 rounded-lg transition duration-300">লগইন</a>`;
+            const mobileLoginBtnHTML = `<a href="javascript:void(0)" data-modal-target="login-modal" id="mobile-login-btn" class="modal-trigger bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold py-2 px-4 rounded-lg transition duration-300 w-full block text-center">লগইন</a>`;
+
+            authSection.innerHTML = loginBtnHTML;
+            mobileAuthSection.innerHTML = mobileLoginBtnHTML;
+
+            document.querySelectorAll('.modal-trigger').forEach(addModalTriggerListener);
+        }
+
+        // --- Authentication Logic ---
+        function checkLoginStatus() {
+            const loggedInUser = sessionStorage.getItem('loggedInUser');
+            if (loggedInUser) {
+                const userData = JSON.parse(loggedInUser);
+                updateUIAfterLogin(userData.studentName);
+            }
+        }
+
+        function logoutUser() {
+            sessionStorage.removeItem('loggedInUser');
+            updateUIAfterLogout();
+        }
+
+        async function handleLogin(event) {
+            event.preventDefault();
+            const loginForm = event.target;
+            const username = loginForm.username.value.trim();
+            const password = loginForm.password.value.trim();
+            const loginStatus = document.getElementById('login-status');
+            const submitBtn = document.getElementById('login-submit-btn');
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'প্রসেসিং...';
+            loginStatus.textContent = '';
+
+            try {
+                const response = await fetch(SCRIPT_URL + '?action=getUsers');
+                const data = await response.json();
+
+                if (data.result === 'success') {
+                    const user = data.users.find(u => u.Username === username && u.Password === password);
+                    if (user) {
+                        if (user.Status === 'Approved') {
+                            loginStatus.textContent = 'লগইন সফল হয়েছে!';
+                            loginStatus.style.color = 'lightgreen';
+                            sessionStorage.setItem('loggedInUser', JSON.stringify({ studentName: user.StudentName, username: user.Username }));
+                            updateUIAfterLogin(user.StudentName);
+                            setTimeout(() => closeModal(document.getElementById('login-modal')), 1000);
+                        } else {
+                            loginStatus.textContent = 'আপনার ভর্তি এখনো Approve হয়নি। অফিসে যোগাযোগ করুন।';
+                            loginStatus.style.color = 'orange';
+                        }
+                    } else {
+                        loginStatus.textContent = 'ভুল ইউজারনেম অথবা পাসওয়ার্ড।';
+                        loginStatus.style.color = 'red';
+                    }
+                } else {
+                    throw new Error('Failed to fetch user data.');
                 }
-                const rankClassName = `rank-${name.toLowerCase().replace(/[^a-z0-9]/g, '-')}`;
-                leagues.push({
-                    name: name,
-                    threshold: Math.floor(threshold),
-                    profitBoost: Math.floor(profitBoost),
-                    rankClass: rankClassName
+            } catch (error) {
+                loginStatus.textContent = 'লগইন করতে সমস্যা হচ্ছে।';
+                loginStatus.style.color = 'red';
+                console.error('Login Error:', error);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'লগইন';
+            }
+        }
+
+        // --- Dynamic Content (Routine, Suggestions, etc.) ---
+        async function initializeDynamicContent() {
+            if (dynamicDataCache) return;
+
+            const loaderHTML = `<div class="text-center p-8"><i class="fas fa-spinner fa-spin text-4xl text-yellow-400"></i></div>`;
+            document.getElementById('featured-courses-container').innerHTML = loaderHTML;
+
+            try {
+                const response = await fetch(SCRIPT_URL + '?action=getDynamicData');
+                const data = await response.json();
+                if (data.result !== 'success') throw new Error(data.error);
+                
+                dynamicDataCache = data;
+                displayFeaturedCourses();
+            } catch (error) {
+                const errorHTML = `<p class="text-center text-red-400 mt-8">কোর্স লোড করতে সমস্যা হচ্ছে।</p>`;
+                document.getElementById('featured-courses-container').innerHTML = errorHTML;
+                console.error('Dynamic Content Fetch Error:', error);
+            }
+        }
+
+        function populateModalContent(modalId) {
+            const loaderHTML = `<div class="text-center p-8"><i class="fas fa-spinner fa-spin text-4xl text-yellow-400"></i></div>`;
+            const displayElement = document.getElementById(modalId.replace('-modal', '-display'));
+            if (displayElement) displayElement.innerHTML = loaderHTML;
+
+            if (!dynamicDataCache) {
+                initializeDynamicContent().then(() => {
+                    if(dynamicDataCache) renderContent(modalId);
                 });
+            } else {
+                renderContent(modalId);
+            }
+        }
+        
+        function renderContent(modalId) {
+             switch(modalId) {
+                case 'routine-modal':
+                    setupDynamicTabs('routine', displayRoutine);
+                    break;
+                case 'suggestions-modal':
+                    setupDynamicTabs('suggestion', displaySuggestions);
+                    break;
+                case 'teachers-modal':
+                    displayTeachers();
+                    break;
+                case 'courses-modal':
+                    displayCourses();
+                    break;
+            }
+        }
+
+        function setupDynamicTabs(type, displayFunction) {
+            const curriculumTabsContainer = document.getElementById(`${type}-curriculum-tabs`);
+            const classTabsContainer = document.getElementById(`${type}-class-tabs-container`);
+            const displayContainer = document.getElementById(`${type}-display`);
+
+            curriculumTabsContainer.innerHTML = '';
+            ['School', 'Madrasha'].forEach((curriculum, index) => {
+                curriculumTabsContainer.innerHTML += `<button class="custom-tab curriculum-tab ${index === 0 ? 'active' : ''}" data-curriculum="${curriculum}">${curriculum}</button>`;
+            });
+
+            function updateClassTabs(curriculum) {
+                classTabsContainer.innerHTML = '';
+                const classes = staticClasses[curriculum] || [];
+                classes.forEach((className, index) => {
+                    const tab = document.createElement('button');
+                    tab.className = `class-tab ${index === 0 ? 'active' : ''}`;
+                    tab.textContent = className;
+                    tab.dataset.class = className;
+                    classTabsContainer.appendChild(tab);
+                });
+                if (classes.length > 0) {
+                    displayFunction(curriculum, classes[0]);
+                } else {
+                    displayContainer.innerHTML = `<p class="text-center text-gray-400 mt-8">এই কারিকুলামের জন্য কোনো ক্লাস নেই।</p>`;
+                }
+            }
+
+            curriculumTabsContainer.addEventListener('click', (e) => {
+                if (e.target.matches('.curriculum-tab')) {
+                    curriculumTabsContainer.querySelector('.active').classList.remove('active');
+                    e.target.classList.add('active');
+                    updateClassTabs(e.target.dataset.curriculum);
+                }
+            });
+
+            classTabsContainer.addEventListener('click', (e) => {
+                if (e.target.matches('.class-tab')) {
+                    classTabsContainer.querySelector('.active')?.classList.remove('active');
+                    e.target.classList.add('active');
+                    const selectedCurriculum = curriculumTabsContainer.querySelector('.active').dataset.curriculum;
+                    displayFunction(selectedCurriculum, e.target.dataset.class);
+                }
+            });
+            
+            updateClassTabs('School');
+        }
+
+        function displayRoutine(curriculum, className) {
+            const routineDisplay = document.getElementById('routine-display');
+            const classRoutine = dynamicDataCache?.routine?.[curriculum]?.[className];
+            if (!classRoutine) {
+                routineDisplay.innerHTML = `<p class="text-center text-gray-400 mt-8">এই শ্রেণীর জন্য এখনো রুটিন যোগ করা হয়নি।</p>`;
+                return;
+            }
+            const days = ['শনিবার', 'রবিবার', 'সোমবার', 'মঙ্গলবার', 'বুধবার', 'বৃহস্পতিবার'];
+            let routineHTML = '<div class="space-y-4">';
+            days.forEach(day => {
+                const dayClasses = classRoutine[day] || [];
+                routineHTML += `<div class="grid grid-cols-12 gap-4 items-center"><div class="col-span-3 md:col-span-2 text-yellow-400 font-bold text-center">${day}</div><div class="col-span-9 md:col-span-10 bg-gray-900/50 rounded-lg p-3 grid grid-cols-1 md:grid-cols-3 gap-3">`;
+                if (dayClasses.length > 0) {
+                    dayClasses.forEach(cls => {
+                        routineHTML += `<div class="bg-gray-700 p-2 rounded text-center"><p class="font-semibold">${cls.subject}</p><p class="text-sm text-gray-400">${cls.time}</p></div>`;
+                    });
+                } else {
+                    routineHTML += `<div class="text-gray-500 text-center col-span-1 md:col-span-3">কোনো ক্লাস নেই</div>`;
+                }
+                routineHTML += `</div></div>`;
+            });
+            routineHTML += '</div>';
+            routineDisplay.innerHTML = routineHTML;
+        }
+
+        function displaySuggestions(curriculum, className) {
+            const suggestionDisplay = document.getElementById('suggestion-display');
+            const subjectsForClass = staticSubjects[curriculum]?.[className];
+            if (!subjectsForClass) {
+                suggestionDisplay.innerHTML = `<p class="text-center text-gray-400 mt-8">এই শ্রেণীর জন্য কোনো বিষয় তালিকাভুক্ত নেই।</p>`;
+                return;
+            }
+            
+            let subjectsHTML = '<div class="grid grid-cols-2 md:grid-cols-4 gap-4">';
+            subjectsForClass.forEach(subject => {
+                const link = dynamicDataCache?.suggestions?.[curriculum]?.[className]?.[subject];
+                if (link && link.trim() !== '#' && link.trim() !== '') {
+                    subjectsHTML += `<a href="${link}" target="_blank" class="bg-gray-700 hover:bg-yellow-500 hover:text-gray-900 transition-all duration-300 font-bold text-center p-4 rounded-lg">${subject}</a>`;
+                } else {
+                    subjectsHTML += `<div class="bg-gray-800 text-gray-500 cursor-not-allowed font-bold text-center p-4 rounded-lg opacity-50">${subject}</div>`;
+                }
+            });
+            subjectsHTML += '</div>';
+            suggestionDisplay.innerHTML = subjectsHTML;
+        }
+
+        function displayTeachers() {
+            const teachersDisplay = document.getElementById('teachers-display');
+            const teachers = dynamicDataCache?.teachers;
+            if (!teachers || teachers.length === 0) {
+                teachersDisplay.innerHTML = `<p class="text-center text-gray-400 mt-8">এখনো কোনো শিক্ষকের তথ্য যোগ করা হয়নি।</p>`;
+                return;
+            }
+            let teachersHTML = '<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">';
+            teachers.forEach(teacher => {
+                const directImageUrl = convertGoogleDriveLink(teacher.PhotoURL);
+                teachersHTML += `
+                    <div class="bg-gray-900 rounded-xl p-6 text-center section-glow">
+                        <img class="w-32 h-32 rounded-full mx-auto mb-4 border-4 border-yellow-400 object-cover" src="${directImageUrl}" alt="${teacher.Name}" onerror="this.onerror=null;this.src='https://placehold.co/128x128/374151/FFFFFF?text=Image';">
+                        <h3 class="text-xl font-bold text-white">${teacher.Name}</h3>
+                        <p class="text-yellow-400">${teacher.Qualification}</p>
+                    </div>
+                `;
+            });
+            teachersHTML += '</div>';
+            teachersDisplay.innerHTML = teachersHTML;
+        }
+
+        function displayCourses() {
+            const coursesDisplay = document.getElementById('courses-display');
+            const courses = dynamicDataCache?.courses;
+            if (!courses || courses.length === 0) {
+                coursesDisplay.innerHTML = `<p class="text-center text-gray-400 mt-8">এখনো কোনো কোর্সের তথ্য যোগ করা হয়নি।</p>`;
+                return;
+            }
+            let coursesHTML = '<div class="space-y-4">';
+            courses.forEach(course => {
+                coursesHTML += `
+                    <div class="bg-gray-900 rounded-lg section-glow">
+                        <button class="accordion-btn w-full flex justify-between items-center p-5 font-semibold text-left text-white text-xl" data-course-name="${course.CourseName}">
+                            <span>${course.CourseName}</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                        <div class="accordion-content hidden p-5 border-t border-gray-700">
+                            <p class="text-gray-400 mb-4">${course.Details}</p>
+                            <h4 class="font-bold text-yellow-400 mb-2">এই কোর্সের বিষয়সমূহ:</h4>
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+                                ${course.Subjects.map(subject => `<span class="bg-gray-700 text-center text-sm rounded-full px-3 py-1">${subject}</span>`).join('')}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            coursesHTML += '</div>';
+            coursesDisplay.innerHTML = coursesHTML;
+            coursesDisplay.querySelectorAll('.accordion-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const content = btn.nextElementSibling;
+                    const icon = btn.querySelector('i');
+                    content.classList.toggle('hidden');
+                    if(icon) {
+                        icon.classList.toggle('fa-chevron-down');
+                        icon.classList.toggle('fa-chevron-up');
+                    }
+                });
+            });
+        }
+
+        function displayFeaturedCourses() {
+            const container = document.getElementById('featured-courses-container');
+            const courses = dynamicDataCache?.courses;
+            if (!courses || courses.length === 0) {
+                container.innerHTML = `<p class="text-center text-gray-400 w-full">এখনো কোনো কোর্স যোগ করা হয়নি।</p>`;
+                return;
+            }
+            let coursesHTML = '';
+            courses.forEach(course => {
+                coursesHTML += `
+                    <div class="bg-gray-800 rounded-xl p-6 text-center w-64 flex-shrink-0 snap-center section-glow">
+                        <h3 class="text-xl font-bold text-yellow-400 mb-4 h-16 flex items-center justify-center">${course.CourseName}</h3>
+                        <a href="javascript:void(0)" data-modal-target="courses-modal" data-course-name="${course.CourseName}" class="modal-trigger text-white hover:text-yellow-400 font-semibold">View Details &rarr;</a>
+                    </div>
+                `;
+            });
+            container.innerHTML = coursesHTML;
+            document.querySelectorAll('#featured-courses-container .modal-trigger').forEach(addModalTriggerListener);
+        }
+
+        // --- Event Listeners Setup ---
+        document.addEventListener('DOMContentLoaded', () => {
+            checkLoginStatus();
+            initializeDynamicContent(); // Pre-load all data on page load
+            document.getElementById('menu-btn').addEventListener('click', () => document.getElementById('mobile-menu').classList.toggle('hidden'));
+            document.querySelectorAll('.modal-trigger').forEach(addModalTriggerListener);
+            document.querySelectorAll('.modal').forEach(modal => {
+                const closeBtn = modal.querySelector('.modal-close');
+                if (closeBtn) closeBtn.addEventListener('click', () => closeModal(modal));
+                modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(modal); });
+            });
+            setupAdmissionForm();
+            document.getElementById('login-form').addEventListener('submit', handleLogin);
+            
+            // Slider functionality
+            const scrollContainer = document.getElementById('featured-courses-container');
+            const scrollLeftBtn = document.getElementById('scroll-left');
+            const scrollRightBtn = document.getElementById('scroll-right');
+            if(scrollContainer && scrollLeftBtn && scrollRightBtn) {
+                if(scrollContainer.scrollWidth > scrollContainer.clientWidth) {
+                    scrollLeftBtn.classList.remove('hidden');
+                    scrollRightBtn.classList.remove('hidden');
+                }
+                scrollLeftBtn.addEventListener('click', () => { scrollContainer.scrollBy({ left: -300, behavior: 'smooth' }); });
+                scrollRightBtn.addEventListener('click', () => { scrollContainer.scrollBy({ left: 300, behavior: 'smooth' }); });
+            }
+        });
+
+        function addModalTriggerListener(trigger) {
+            trigger.addEventListener('click', (e) => {
+                if (trigger.classList.contains('protected-link') && !sessionStorage.getItem('loggedInUser')) {
+                    e.preventDefault();
+                    openModal(document.getElementById('notice-modal'));
+                    return;
+                }
                 
-                const color1 = `hsl(${Math.random() * 360}, 50%, 60%)`;
-                const color2 = `hsl(${Math.random() * 360}, 60%, 40%)`;
-                const textColor = (Math.random() > 0.5) ? 'white' : '#1f2937';
+                const targetModalId = trigger.getAttribute('data-modal-target');
+                const modal = document.getElementById(targetModalId);
                 
-                if (styleSheet && styleSheet.cssRules) {
-                    try {
-                        styleSheet.insertRule(`.${rankClassName} { background-image: linear-gradient(135deg, ${color1}, ${color2}); color: ${textColor}; }`, styleSheet.cssRules.length);
-                    } catch (e) {
-                        console.error("Failed to insert CSS rule:", e);
+                if (modal) {
+                    openModal(modal);
+                    if (dynamicDataCache) {
+                        populateModalContent(targetModalId);
+                        const courseNameToOpen = trigger.getAttribute('data-course-name');
+                        if (courseNameToOpen) {
+                            const accordionBtn = modal.querySelector(`.accordion-btn[data-course-name="${courseNameToOpen}"]`);
+                            if (accordionBtn && accordionBtn.nextElementSibling.classList.contains('hidden')) {
+                                accordionBtn.click();
+                            }
+                        }
                     }
                 }
             });
         }
         
-        // --- Game Logic ---
-        function formatNumber(num) { if (num < 1000) return num.toLocaleString(); if (num < 1000000) return (num / 1000).toFixed(1).replace(/\.0$/, '') + 'K'; if (num < 1000000000) return (num / 1000000).toFixed(2).replace(/\.00$/, '') + 'M'; return (num / 1000000000).toFixed(3).replace(/\.000$/, '') + 'B'; }
-        function formatDuration(ms) { const h = Math.floor(ms / 3600000); const m = Math.floor((ms % 3600000) / 60000); return `${h}h ${m}m`; }
-        function updateDisplay() {
-            playerNameDisplay.textContent = gameState.playerUsername || 'Player';
-            scoreDisplayMain.textContent = Math.floor(gameState.coins).toLocaleString();
-            diamondDisplayTop.textContent = gameState.diamonds.toLocaleString();
-            diamondBalanceShop.textContent = gameState.diamonds.toLocaleString();
-            profitDisplay.textContent = `+${formatNumber(gameState.profitPerHour)}`;
-            energyDisplay.textContent = `${gameState.energy}/${gameState.maxEnergy}`;
-            energyBar.style.width = `${(gameState.energy / gameState.maxEnergy) * 100}%`;
-            energyRegenRateSpan.textContent = gameState.energyRegenRate;
-            tapUpgradeCostSpan.textContent = formatNumber(gameState.tapUpgradeCost);
-            boostEnergyCostSpan.textContent = formatNumber(gameState.boostEnergyCost);
-            energyRefillCostSpan.textContent = formatNumber(gameState.energyRefillCost);
-            currentOfflineTimeSpan.textContent = formatDuration(gameState.maxOfflineTime);
-            if(gameState.playerUsername) {
-                inviteCodeText.textContent = `Your Invite Code: TapTap(${gameState.playerUsername})`;
-            }
-        }
-        function showFloatingText(event) { const text = document.createElement('div'); text.textContent = `+${gameState.coinsPerTap}`; text.className = 'floating-text'; const rect = clickArea.getBoundingClientRect(); const x = (event.clientX || event.touches[0].clientX) - rect.left; const y = (event.clientY || event.touches[0].clientY) - rect.top; text.style.left = `${x}px`; text.style.top = `${y}px`; clickArea.appendChild(text); setTimeout(() => text.remove(), 1000); }
-        function handleHamsterClick(event) { if (gameState.energy >= gameState.coinsPerTap) { gameState.coins += gameState.coinsPerTap; gameState.energy -= gameState.coinsPerTap; showFloatingText(event); checkLeagueUp(); updateDisplay(); } }
-        function checkLeagueUp() { 
-            let hasRankedUp = false;
-            let originalIndex = gameState.currentLeagueIndex;
-            while (gameState.currentLeagueIndex < leagues.length - 1 && gameState.coins >= leagues[gameState.currentLeagueIndex + 1].threshold) { 
-                gameState.currentLeagueIndex++; 
-                if (leagues[gameState.currentLeagueIndex].profitBoost) { 
-                    gameState.profitPerHour += leagues[gameState.currentLeagueIndex].profitBoost; 
+        // --- Admission Form Setup ---
+        function setupAdmissionForm() {
+            const form = document.getElementById('admission-form');
+            const curriculumSelect = document.getElementById('curriculum-select');
+            const classSelect = document.getElementById('class-select');
+            const subjectCheckboxesContainer = document.getElementById('subject-checkboxes-container');
+            const admissionFeeDisplay = document.getElementById('admission-fee-display');
+            const feeDisplay = document.getElementById('monthly-fee-display');
+            const formStatus = document.getElementById('form-status');
+            const submitBtn = document.getElementById('submit-btn');
+
+            function updateClassOptions() {
+                const selectedCurriculum = curriculumSelect.value;
+                classSelect.innerHTML = '<option value="">-- ক্লাস নির্বাচন করুন --</option>';
+                if (selectedCurriculum && staticClasses[selectedCurriculum]) {
+                    staticClasses[selectedCurriculum].forEach(className => {
+                        classSelect.innerHTML += `<option value="${className}">${className}</option>`;
+                    });
                 }
-                hasRankedUp = true;
-            } 
-            
-            const newLeague = leagues[gameState.currentLeagueIndex]; 
-            leagueBadge.textContent = newLeague.name; 
-            leagueBadge.className = `px-3 py-1.5 rounded-full font-bold transition-all duration-500 text-xs text-center ${newLeague.rankClass}`; 
-        
-            if(hasRankedUp){
-                newRankNameSpan.textContent = newLeague.name;
-                rankUpModal.classList.remove('hidden');
-                 setTimeout(() => {
-                    rankUpModal.classList.remove('opacity-0', 'scale-95');
-                }, 10);
-            }
-        }
-        function applyPassiveIncome() { gameState.coins += gameState.profitPerHour / 3600; checkLeagueUp(); updateDisplay(); }
-        function regenerateEnergy() { if (gameState.energy < gameState.maxEnergy) { gameState.energy = Math.min(gameState.maxEnergy, gameState.energy + gameState.energyRegenRate); updateDisplay(); } }
-        function upgradeTap() { if (gameState.coins >= gameState.tapUpgradeCost) { gameState.coins -= gameState.tapUpgradeCost; gameState.coinsPerTap++; gameState.tapUpgradeCost = Math.floor(gameState.tapUpgradeCost * 1.5); updateDisplay(); } }
-        function boostEnergy() { if (gameState.coins >= gameState.boostEnergyCost) { gameState.coins -= gameState.boostEnergyCost; gameState.maxEnergy += 500; gameState.energy = gameState.maxEnergy; gameState.boostEnergyCost = Math.floor(gameState.boostEnergyCost * 1.8); updateDisplay(); } }
-        function upgradeEnergyRefill() { if (gameState.coins >= gameState.energyRefillCost) { gameState.coins -= gameState.energyRefillCost; gameState.energyRegenRate++; gameState.energyRefillCost = Math.floor(gameState.energyRefillCost * 2); updateDisplay(); } }
-        function initializeMarkets() { const shuffledCities = [...cityNames].sort(() => 0.5 - Math.random()); for (let i = 0; i < 102; i++) { gameState.markets.push({ id: i, name: shuffledCities[i], cost: Math.floor(Math.random() * 4001) + 1000, profitIncrease: Math.floor(Math.random() * 901) + 100, unlocked: false, type: 'city' }); } const shuffledPremium = [...premiumItemNames].sort(() => 0.5 - Math.random()); for (let i = 0; i < 48; i++) { gameState.markets.push({ id: `premium_${i}`, name: shuffledPremium[i], cost: Math.floor(Math.random() * 40001) + 10000, profitIncrease: Math.floor(Math.random() * 7001) + 1000, unlocked: false, type: 'premium' }); } }
-        function addNewSpecialMarket() { const newId = 'special_' + gameState.markets.length; const randomName = specialItemNames[Math.floor(Math.random() * specialItemNames.length)]; const newMarket = { id: newId, name: randomName, cost: Math.floor(Math.random() * 900001) + 100000, profitIncrease: Math.floor(Math.random() * 90001) + 10000, unlocked: false, type: 'special' }; gameState.markets.push(newMarket); }
-        function renderMarkets() { marketsGrid.innerHTML = ''; const sortedMarkets = [...gameState.markets].sort((a, b) => { if (a.type === 'special' && b.type !== 'special') return 1; if (a.type !== 'special' && b.type === 'special') return -1; return 0; }); sortedMarkets.forEach(market => { const button = document.createElement('button'); button.className = 'p-3 rounded-lg text-center font-bold transition text-sm flex flex-col justify-between h-24'; if (market.unlocked) { button.classList.add('bg-green-800', 'cursor-not-allowed'); button.innerHTML = `<span>${market.name}</span><span class="text-xs font-normal mt-1">Purchased</span><span class="text-xs text-green-300 font-bold">+${formatNumber(market.profitIncrease)}/hr</span>`; button.disabled = true; } else { const canAfford = gameState.coins >= market.cost; if (market.type === 'special') { button.classList.add(...(canAfford ? ['bg-gradient-to-r', 'from-yellow-400', 'to-amber-500', 'text-black', 'hover:from-yellow-500'] : ['bg-gray-800', 'cursor-not-allowed', 'opacity-60'])); } else if (market.type === 'premium') { button.classList.add(...(canAfford ? ['bg-gradient-to-r', 'from-blue-400', 'to-cyan-500', 'text-white', 'hover:from-blue-500'] : ['bg-gray-800', 'cursor-not-allowed', 'opacity-60'])); } else { button.classList.add(...(canAfford ? ['bg-purple-600', 'hover:bg-purple-700'] : ['bg-gray-700', 'cursor-not-allowed', 'opacity-60'])); } button.innerHTML = `<span>${market.name}</span><span class="text-xs font-normal mt-1 text-yellow-300">Cost: ${formatNumber(market.cost)}</span><span class="text-xs text-green-300 font-bold">+${formatNumber(market.profitIncrease)}/hr</span>`; button.disabled = !canAfford; button.onclick = () => purchaseMarket(market.id); } marketsGrid.appendChild(button); }); }
-        function purchaseMarket(id) { const market = gameState.markets.find(m => m.id === id); if (market && !market.unlocked && gameState.coins >= market.cost) { gameState.coins -= market.cost; gameState.profitPerHour += market.profitIncrease; market.unlocked = true; if (market.type === 'city') { addNewSpecialMarket(); } updateDisplay(); renderMarkets(); } }
-        function renderShop() { shopGrid.innerHTML = ''; shopItems.forEach(item => { const button = document.createElement('button'); button.className = 'p-4 rounded-lg text-center font-bold transition flex flex-col items-center justify-center'; const canAfford = gameState.coins >= item.cost; button.classList.add(...(canAfford ? ['bg-orange-600', 'hover:bg-orange-700'] : ['bg-gray-700', 'cursor-not-allowed', 'opacity-60'])); button.innerHTML = `<div class="text-lg">Claim ${item.reward.toLocaleString()} Diamonds</div><div class="text-sm font-normal text-yellow-300">Cost: ${formatNumber(item.cost)} Coins</div>`; button.disabled = !canAfford; button.onclick = () => claimDiamonds(item.cost, item.reward); shopGrid.appendChild(button); }); }
-        function claimDiamonds(cost, reward) { if (gameState.coins >= cost) { gameState.coins -= cost; gameState.diamonds += reward; updateDisplay(); renderShop(); } }
-        function renderOfflineShop() { offlineTimeGrid.innerHTML = ''; offlineShopItems.forEach(item => { const button = document.createElement('button'); button.className = 'p-4 rounded-lg text-center font-bold transition flex flex-col items-center justify-center'; const isPurchased = gameState.offlineUpgradesPurchased.includes(item.id); const canAfford = gameState.diamonds >= item.cost; if (isPurchased) { button.classList.add('bg-green-800', 'cursor-not-allowed'); button.innerHTML = `<div class="text-lg">Purchased</div><div class="text-sm font-normal">+${item.label}</div>`; button.disabled = true; } else { button.classList.add(...(canAfford ? ['bg-indigo-600', 'hover:bg-indigo-700'] : ['bg-gray-700', 'cursor-not-allowed', 'opacity-60'])); button.innerHTML = `<div class="text-lg">${item.label}</div><div class="text-sm font-normal text-yellow-300">Cost: ${formatNumber(item.cost)} Diamonds</div>`; button.disabled = !canAfford; button.onclick = () => purchaseOfflineTime(item.id, item.cost, item.duration); } offlineTimeGrid.appendChild(button); }); }
-        function purchaseOfflineTime(id, cost, duration) { if (gameState.diamonds >= cost && !gameState.offlineUpgradesPurchased.includes(id)) { gameState.diamonds -= cost; gameState.maxOfflineTime += duration; gameState.offlineUpgradesPurchased.push(id); updateDisplay(); renderOfflineShop(); } }
-        function populateLeagues() { leagueList.innerHTML = ''; leagues.forEach((league, index) => { const li = document.createElement('li'); li.className = 'p-3 rounded-lg flex justify-between items-center text-md font-bold transition-all duration-300'; const isCurrent = index === gameState.currentLeagueIndex; const isUnlocked = index <= gameState.currentLeagueIndex; if (isUnlocked) li.classList.add(league.rankClass); else li.classList.add('rank-locked'); if (isCurrent) li.classList.add('rank-current'); li.innerHTML = `<span>${league.name}</span><span class="text-xs font-normal">${isUnlocked ? 'Coin > ' + formatNumber(league.threshold) : '🔒 Coin > ' + formatNumber(league.threshold)}</span>`; leagueList.appendChild(li); }); }
-        function saveGame() { gameState.lastVisit = Date.now(); localStorage.setItem('tapTapGameState', JSON.stringify(gameState)); }
-        function loadGame() { const savedState = localStorage.getItem('tapTapGameState'); if (savedState) { const loadedState = JSON.parse(savedState); if (!loadedState.playerName || !loadedState.playerUsername) { return false; } const timeOffline = Date.now() - loadedState.lastVisit; const effectiveOfflineTime = Math.min(timeOffline, loadedState.maxOfflineTime || (3 * 60 * 60 * 1000)); const offlineEarnings = (loadedState.profitPerHour / 3600) * (effectiveOfflineTime / 1000); if (offlineEarnings > 1) { loadedState.coins += offlineEarnings; offlinePlayerName.textContent = loadedState.playerUsername; offlineEarningsDisplay.textContent = formatNumber(Math.floor(offlineEarnings)); offlineEarningsModal.classList.remove('hidden'); setTimeout(() => { offlineEarningsModal.classList.remove('opacity-0', 'scale-95'); }, 10); } gameState = loadedState; if (!gameState.markets || gameState.markets.length === 0) { initializeMarkets(); } else { gameState.markets.forEach(m => { if(!m.type) m.type = typeof m.id === 'number' ? 'city' : 'special'; }); } if (!gameState.offlineUpgradesPurchased) gameState.offlineUpgradesPurchased = []; if(!gameState.maxOfflineTime) gameState.maxOfflineTime = 3*60*60*1000; if(!gameState.claimedReferralCodes) gameState.claimedReferralCodes = []; if(typeof gameState.claimedInviteCode === 'undefined') gameState.claimedInviteCode = false; return true; } return false; }
-
-        // --- Event Listeners ---
-        clickArea.addEventListener('click', handleHamsterClick);
-        clickArea.addEventListener('touchstart', (e) => { e.preventDefault(); handleHamsterClick(e); }, { passive: false });
-        upgradeTapBtn.addEventListener('click', upgradeTap);
-        boostEnergyBtn.addEventListener('click', boostEnergy);
-        energyRefillBtn.addEventListener('click', upgradeEnergyRefill);
-        rankingBtn.addEventListener('click', () => { populateLeagues(); rankingModal.classList.remove('hidden'); });
-        closeRankingBtn.addEventListener('click', () => rankingModal.classList.add('hidden'));
-        rankingModal.addEventListener('click', (e) => { if (e.target === rankingModal) rankingModal.classList.add('hidden'); });
-        marketsBtn.addEventListener('click', () => { renderMarkets(); marketsModal.classList.remove('hidden'); });
-        closeMarketsBtn.addEventListener('click', () => marketsModal.classList.add('hidden'));
-        marketsModal.addEventListener('click', (e) => { if (e.target === marketsModal) marketsModal.classList.add('hidden'); });
-        shopBtn.addEventListener('click', () => { renderShop(); shopModal.classList.remove('hidden'); });
-        closeShopBtn.addEventListener('click', () => shopModal.classList.add('hidden'));
-        shopModal.addEventListener('click', (e) => { if (e.target === shopModal) shopModal.classList.add('hidden'); });
-        offlineTimeBtn.addEventListener('click', () => { renderOfflineShop(); offlineTimeModal.classList.remove('hidden'); });
-        closeOfflineTimeBtn.addEventListener('click', () => offlineTimeModal.classList.add('hidden'));
-        offlineTimeModal.addEventListener('click', (e) => { if (e.target === offlineTimeModal) offlineTimeModal.classList.add('hidden'); });
-        friendsBtn.addEventListener('click', () => friendsModal.classList.remove('hidden'));
-        closeFriendsBtn.addEventListener('click', () => friendsModal.classList.add('hidden'));
-        friendsModal.addEventListener('click', (e) => { if(e.target === friendsModal) friendsModal.classList.add('hidden'); });
-        closeOfflineBtn.addEventListener('click', () => { offlineEarningsModal.classList.add('opacity-0', 'scale-95'); setTimeout(() => { offlineEarningsModal.classList.add('hidden'); }, 500) });
-        
-        function showMoreModal() {
-            moreModal.classList.remove('hidden');
-            setTimeout(() => {
-                moreModal.classList.remove('opacity-0');
-                moreModalContent.classList.remove('translate-y-full');
-            }, 10);
-        }
-
-        function hideMoreModal() {
-            moreModal.classList.add('opacity-0');
-            moreModalContent.classList.add('translate-y-full');
-            setTimeout(() => {
-                moreModal.classList.add('hidden');
-            }, 300);
-        }
-
-        moreBtn.addEventListener('click', showMoreModal);
-        closeMoreBtn.addEventListener('click', hideMoreModal);
-        moreModal.addEventListener('click', (e) => {
-             if (e.target === moreModal) {
-                hideMoreModal();
-            }
-        });
-
-        inviteCodeDisplay.addEventListener('click', () => {
-            const textToCopy = `TapTap(${gameState.playerUsername})`;
-            const textArea = document.createElement('textarea');
-            textArea.value = textToCopy;
-            // Make the textarea out of sight
-            textArea.style.position = 'fixed';
-            textArea.style.top = 0;
-            textArea.style.left = 0;
-            textArea.style.width = '2em';
-            textArea.style.height = '2em';
-            textArea.style.padding = 0;
-            textArea.style.border = 'none';
-            textArea.style.outline = 'none';
-            textArea.style.boxShadow = 'none';
-            textArea.style.background = 'transparent';
-            document.body.appendChild(textArea);
-            textArea.focus();
-            textArea.select();
-
-            try {
-                document.execCommand('copy');
-                inviteCodeCopyMessage.classList.remove('hidden');
-                setTimeout(() => {
-                    inviteCodeCopyMessage.classList.add('hidden');
-                }, 2000);
-            } catch (err) {
-                console.error('Oops, unable to copy', err);
-            }
-            document.body.removeChild(textArea);
-        });
-
-        submitReferralBtn.addEventListener('click', () => {
-            const code = referralCodeInput.value.trim();
-            referralError.textContent = '';
-            
-            if (gameState.claimedReferralCodes.includes(code)) {
-                referralError.textContent = 'This code has already been claimed.';
-                return;
-            }
-            
-            let bonus = referralCodes[code];
-            let diamondBonus = 0;
-            let isUserInvite = false;
-            let isSuperCode = false;
-
-            // Check for super referral codes
-            if (superReferralCodes.includes(code)) {
-                bonus = Math.floor(Math.random() * (5000000 - 3000000 + 1)) + 3000000;
-                isSuperCode = true;
-            } 
-            // Check for diamond referral codes
-            else if (diamondReferralCodes.includes(code)) {
-                diamondBonus = Math.floor(Math.random() * (1000 - 100 + 1)) + 100;
-            }
-            // Check for user invite codes
-            else if(!bonus) {
-                 const match = code.match(/^TapTap\((.+)\)$/);
-                 if(match && match[1]) {
-                     const invitedByUsername = match[1];
-                     const allUsernames = JSON.parse(localStorage.getItem('tapTapAllUsernames')) || [];
-                     if(allUsernames.includes(invitedByUsername) && invitedByUsername !== gameState.playerUsername) {
-                        if(gameState.claimedInviteCode) {
-                            referralError.textContent = 'You have already claimed an invite bonus.';
-                            return;
-                        }
-                        bonus = 50000;
-                        isUserInvite = true;
-                     }
-                 }
+                updateSubjectCheckboxes();
             }
 
-            if (bonus || diamondBonus > 0) {
-                if (bonus) gameState.coins += bonus;
-                if (diamondBonus) gameState.diamonds += diamondBonus;
+            function updateSubjectCheckboxes() {
+                const selectedCurriculum = curriculumSelect.value;
+                const selectedClass = classSelect.value;
+                subjectCheckboxesContainer.innerHTML = '';
+                const allSubjectsForClass = staticSubjects[selectedCurriculum]?.[selectedClass];
+                const feeData = dynamicDataCache?.fees?.[selectedCurriculum]?.[selectedClass];
 
-                gameState.claimedReferralCodes.push(code);
-                if(isUserInvite) {
-                    gameState.claimedInviteCode = true;
-                    referralSection.innerHTML = '<p class="text-green-400 text-center">Invite bonus claimed!</p>';
+                if (allSubjectsForClass) {
+                    if (feeData && feeData['All Subjects']) {
+                        const fee = feeData['All Subjects'];
+                        subjectCheckboxesContainer.innerHTML += `
+                            <label for="subject-all" class="flex items-center bg-yellow-600/20 border border-yellow-500 rounded-lg p-2 cursor-pointer hover:bg-yellow-600/30 md:col-span-3">
+                                <input type="checkbox" id="subject-all" name="selectedSubjects" value="All Subjects" data-fee="${fee}" class="form-checkbox h-5 w-5 text-yellow-500 bg-gray-800 border-gray-600 rounded focus:ring-yellow-600">
+                                <span class="ml-3 text-yellow-400 font-bold text-sm">সকল বিষয় (প্যাকেজ)</span>
+                            </label>
+                        `;
+                    }
+
+                    allSubjectsForClass.forEach(subjectName => {
+                        const fee = feeData?.[subjectName] || 0;
+                        const checkboxId = `subject-${subjectName.replace(/[^a-zA-Z0-9]/g, '')}`;
+                        subjectCheckboxesContainer.innerHTML += `
+                            <label for="${checkboxId}" class="flex items-center bg-gray-700 border border-gray-600 rounded-lg p-2 cursor-pointer hover:bg-gray-600">
+                                <input type="checkbox" id="${checkboxId}" name="selectedSubjects" value="${subjectName}" data-fee="${fee}" class="form-checkbox h-5 w-5 text-yellow-500 bg-gray-800 border-gray-600 rounded focus:ring-yellow-600">
+                                <span class="ml-3 text-white text-sm">${subjectName}</span>
+                            </label>
+                        `;
+                    });
                 }
+                updateFee();
+            }
 
-                updateDisplay();
-                saveGame();
-                referralCodeInput.value = '';
-                friendsModal.classList.add('hidden');
+            function updateFee() {
+                let totalFee = 0;
+                const checkedSubjects = subjectCheckboxesContainer.querySelectorAll('input[name="selectedSubjects"]:checked');
+                const allSubjectsCheckbox = document.getElementById('subject-all');
                 
-                if (diamondBonus > 0) {
-                     referralBonusText.textContent = `You've received a ${diamondBonus.toLocaleString()} Diamond bonus!`;
+                if (allSubjectsCheckbox && allSubjectsCheckbox.checked) {
+                    totalFee = parseInt(allSubjectsCheckbox.dataset.fee);
+                    subjectCheckboxesContainer.querySelectorAll('input:not(#subject-all)').forEach(cb => { cb.checked = false; cb.disabled = true; });
                 } else {
-                     referralBonusText.textContent = `You've received a ${formatNumber(bonus)} Coin bonus!`;
+                     subjectCheckboxesContainer.querySelectorAll('input:not(#subject-all)').forEach(cb => { cb.disabled = false; });
+                    checkedSubjects.forEach(checkbox => { totalFee += parseInt(checkbox.dataset.fee); });
                 }
-               
-                referralSuccessModal.classList.remove('hidden');
-                setTimeout(() => {
-                    referralSuccessModal.classList.remove('opacity-0', 'scale-95');
-                }, 10);
+                
+                const admissionFeeData = dynamicDataCache?.fees?.['Admission Fee'];
+                let admissionFee = admissionFeeData ? parseInt(admissionFeeData) : 0;
+
+                if (admissionFee === 0 || isNaN(admissionFee)) {
+                    admissionFeeDisplay.textContent = 'এককালীন ভর্তি ফি: ফ্রি!';
+                    admissionFee = 0;
+                } else {
+                    admissionFeeDisplay.textContent = `এককালীন ভর্তি ফি: ${admissionFee} টাকা`;
+                }
+
+                if (totalFee > 0) {
+                    feeDisplay.textContent = `মোট মাসিক ফি: ${totalFee} টাকা`;
+                } else {
+                    feeDisplay.textContent = '';
+                }
+            }
+            
+            curriculumSelect.addEventListener('change', updateClassOptions);
+            classSelect.addEventListener('change', updateSubjectCheckboxes);
+            subjectCheckboxesContainer.addEventListener('change', updateFee);
+            
+            function validateForm() {
+                let isValid = true;
+                formStatus.textContent = '';
+                form.querySelectorAll('[required]').forEach(input => {
+                    const parent = input.closest('.form-input');
+                    if (parent) parent.classList.remove('invalid');
+                    else input.classList.remove('invalid');
+
+                    if (!input.value) {
+                        isValid = false;
+                        if(parent) parent.classList.add('invalid');
+                        else input.classList.add('invalid');
+                        formStatus.textContent = `অনুগ্রহ করে "${input.placeholder || input.name.replace('_10_digit', '')}" পূরণ করুন।`;
+                        formStatus.style.color = 'red';
+                    }
+                });
+
+                if (isValid) {
+                    const studentMobile = form.querySelector('[name="student_mobile_10_digit"]');
+                    const guardianMobile = form.querySelector('[name="guardian_mobile_10_digit"]');
+                    if (studentMobile.value.length !== 10) {
+                        isValid = false;
+                        studentMobile.closest('.form-input').classList.add('invalid');
+                        formStatus.textContent = 'শিক্ষার্থীর মোবাইল নম্বর ১০ সংখ্যার হতে হবে।';
+                        formStatus.style.color = 'red';
+                    } else if (guardianMobile.value.length !== 10) {
+                        isValid = false;
+                        guardianMobile.closest('.form-input').classList.add('invalid');
+                        formStatus.textContent = 'অভিভাবকের মোবাইল নম্বর ১০ সংখ্যার হতে হবে।';
+                        formStatus.style.color = 'red';
+                    }
+                }
+
+                if (isValid && subjectCheckboxesContainer.querySelectorAll('input:checked').length === 0) {
+                    isValid = false;
+                    formStatus.textContent = 'অনুগ্রহ করে কমপক্ষে একটি বিষয় নির্বাচন করুন।';
+                    formStatus.style.color = 'red';
+                }
+                return isValid;
+            }
+
+            form.addEventListener('submit', e => {
+                e.preventDefault();
+                if (!validateForm()) return;
+
+                form.StudentMobile.value = '+880' + form.student_mobile_10_digit.value;
+                form.GuardianMobile.value = '+880' + form.guardian_mobile_10_digit.value;
+
+                const selectedSubjects = Array.from(subjectCheckboxesContainer.querySelectorAll('input[name="selectedSubjects"]:checked')).map(cb => cb.value);
+                form.Subject.value = selectedSubjects.join(', ');
+
+                const studentName = form.StudentName.value;
+                const nameParts = studentName.split(' ').filter(n => n);
+                const lastName = nameParts.length > 1 ? nameParts[nameParts.length - 1] : studentName;
+                const username = lastName.toLowerCase().replace(/[^a-z]/g, '') + Math.floor(1000 + Math.random() * 9000);
+                const password = 'UCC' + Math.floor(1000 + Math.random() * 9000);
+                form.Username.value = username;
+                form.Password.value = password;
+                
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'সাবমিট হচ্ছে...';
+
+                fetch(SCRIPT_URL, { method: 'POST', body: new FormData(form)})
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.result === 'success') {
+                            formStatus.textContent = `ফর্ম সাবমিট হয়েছে!`;
+                            formStatus.style.color = 'lightgreen';
+                            
+                            showReceipt(form);
+
+                            form.reset();
+                            updateClassOptions();
+                            setTimeout(() => {
+                                closeModal(document.getElementById('admission-modal'));
+                                formStatus.textContent = '';
+                            }, 1000); 
+                        } else {
+                            throw new Error(data.error || 'Unknown error');
+                        }
+                    })
+                    .catch(error => {
+                        formStatus.textContent = 'একটি সমস্যা হয়েছে। আবার চেষ্টা করুন।';
+                        formStatus.style.color = 'red';
+                        console.error('Error!', error.message);
+                    })
+                    .finally(() => {
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = 'ফর্ম সাবমিট করুন';
+                    });
+            });
+        }
+
+        function showReceipt(form) {
+            const receiptContent = document.getElementById('receipt-content');
+            const now = new Date();
+            const date = `${now.getDate()} ${now.toLocaleString('en-GB', { month: 'long' })} ${now.getFullYear()}`;
+            
+            const studentName = form.StudentName.value;
+            const studentNumber = form.StudentMobile.value;
+            const guardianName = form.GuardianName.value;
+            const guardianNumber = form.GuardianMobile.value;
+            const className = form.Class.value;
+            const subjects = form.Subject.value.split(', ');
+            const username = form.Username.value;
+            const password = form.Password.value;
+
+            let totalFee = 0;
+            const checkedSubjects = form.querySelectorAll('input[name="selectedSubjects"]:checked');
+            const allSubjectsCheckbox = document.getElementById('subject-all');
+            
+            if (allSubjectsCheckbox && allSubjectsCheckbox.checked) {
+                totalFee = parseInt(allSubjectsCheckbox.dataset.fee);
             } else {
-                referralError.textContent = 'Invalid code.';
+                checkedSubjects.forEach(checkbox => { totalFee += parseInt(checkbox.dataset.fee); });
+            }
+            
+            const admissionFeeData = dynamicDataCache?.fees?.['Admission Fee'];
+            let admissionFee = admissionFeeData ? parseInt(admissionFeeData) : 0;
+            if (isNaN(admissionFee)) admissionFee = 0;
+
+            const totalPayable = totalFee + admissionFee;
+
+            let subjectsHTML = '';
+            subjects.forEach(sub => {
+                const fee = dynamicDataCache?.fees?.[form.Curriculum.value]?.[className]?.[sub] || 'N/A';
+                subjectsHTML += `<tr><td class="border p-2">${className}</td><td class="border p-2">${sub}</td><td class="border p-2 text-right">${fee}</td></tr>`;
+            });
+
+            receiptContent.innerHTML = `
+                <div class="text-center mb-6">
+                    <h1 class="text-3xl font-bold">UNIQUE COACHING CENTRE</h1>
+                    <p class="text-sm">ইব্রাহিম শপিং সেন্টার ২য় তলা, বাংলাবাজার, সাতকানিয়া, চট্টগ্রাম</p>
+                    <h2 class="text-2xl font-bold mt-4 underline">RECEIPT</h2>
+                </div>
+                <div class="flex justify-between mb-6 text-sm">
+                    <p><strong>Date Admission:</strong> ${date}</p>
+                    <p><strong>Receipt Number:</strong> _________________</p>
+                </div>
+                <hr class="my-4 border-gray-400">
+                <h3 class="text-center font-bold mb-2">Student Information</h3>
+                <hr class="my-4 border-gray-400">
+                <div class="grid grid-cols-2 gap-x-8 gap-y-2 text-sm">
+                    <p><strong>Student Name:</strong> ${studentName}</p>
+                    <p><strong>Student Number:</strong> ${studentNumber}</p>
+                    <p><strong>Guardian Name:</strong> ${guardianName}</p>
+                    <p><strong>Guardian Number:</strong> ${guardianNumber}</p>
+                </div>
+                <div class="flex mt-4">
+                    <div class="w-2/3">
+                        <p class="text-sm"><strong>Website Username:</strong> <span class="font-bold text-lg">${username}</span></p>
+                        <p class="text-sm"><strong>Password:</strong> <span class="font-bold text-lg">${password}</span></p>
+                    </div>
+                    <div class="w-1/3 flex justify-end">
+                        <img src="${QR_CODE_URL}" alt="QR Code" class="w-24 h-24 object-cover">
+                    </div>
+                </div>
+                <hr class="my-4 border-gray-400">
+                <h3 class="text-center font-bold mb-2">Details & Fee</h3>
+                <hr class="my-4 border-gray-400">
+                <table class="w-full border-collapse border border-gray-400 text-sm">
+                    <thead>
+                        <tr class="bg-gray-200">
+                            <th class="border p-2 text-left">Class</th>
+                            <th class="border p-2 text-left">Subjects</th>
+                            <th class="border p-2 text-right">Fees</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${subjectsHTML}
+                        <tr><td colspan="3" class="p-1"></td></tr>
+                        <tr>
+                            <td colspan="2" class="border p-2 text-right font-bold">Admission Fee</td>
+                            <td class="border p-2 text-right">${admissionFee === 0 ? 'Free' : admissionFee}</td>
+                        </tr>
+                        <tr>
+                            <td colspan="2" class="border p-2 text-right font-bold">Monthly Fee</td>
+                            <td class="border p-2 text-right">${totalFee}</td>
+                        </tr>
+                        <tr class="bg-gray-200">
+                            <td colspan="2" class="border p-2 text-right font-bold text-lg">Total</td>
+                            <td class="border p-2 text-right font-bold text-lg">${totalPayable}</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="flex justify-between mt-20 text-sm">
+                    <p class="border-t border-gray-400 pt-1">Signature</p>
+                    <p class="border-t border-gray-400 pt-1">Signature</p>
+                    <p class="border-t border-gray-400 pt-1">Signature</p>
+                </div>
+                <div class="mt-8 text-center text-xs text-red-600 font-bold">
+                    <p>*** বিঃ দ্রঃ এই রসিদটি নিয়ে বাধ্যতামূলক অফিসে যোগাযোগ করে আপনার ভর্তি নিশ্চিত করুন। ***</p>
+                </div>
+            `;
+            preventExit = true;
+            openModal(document.getElementById('receipt-modal'));
+        }
+
+        window.addEventListener('beforeunload', (event) => {
+            if (preventExit) {
+                event.preventDefault();
+                event.returnValue = ''; // For older browsers
+                preventExit = false; // Allow exit on second try
             }
         });
 
-        closeReferralSuccessBtn.addEventListener('click', () => {
-             referralSuccessModal.classList.add('opacity-0', 'scale-95');
-             setTimeout(() => {
-                referralSuccessModal.classList.add('hidden');
-             }, 500)
+        document.getElementById('print-receipt-btn').addEventListener('click', () => {
+            preventExit = false;
+            window.print();
         });
 
-        startGameBtn.addEventListener('click', () => {
-            const name = playerNameInput.value.trim();
-            const username = playerUsernameInput.value.trim();
-            const age = playerAgeInput.value;
-            const usernameRegex = /^[a-zA-Z0-9]+$/;
-            regError.textContent = '';
+        document.getElementById('download-receipt-btn').addEventListener('click', () => {
+            preventExit = false;
+            const { jsPDF } = window.jspdf;
+            const receiptContent = document.getElementById('receipt-content');
             
-            const allUsernames = JSON.parse(localStorage.getItem('tapTapAllUsernames')) || [];
-            
-            if (name === '') { regError.textContent = 'Please enter your name.'; return; }
-            if (username === '') { regError.textContent = 'Please enter a username.'; return; }
-            if (!usernameRegex.test(username)) { regError.textContent = 'Username can only contain letters and numbers.'; return; }
-            if (allUsernames.includes(username)) { regError.textContent = 'Username is already taken.'; return; }
-            if (!age || isNaN(age) || age < 1) { regError.textContent = 'Please enter a valid age.'; return; }
-
-            allUsernames.push(username);
-            localStorage.setItem('tapTapAllUsernames', JSON.stringify(allUsernames));
-
-            gameState.playerName = name;
-            gameState.playerUsername = username;
-            gameState.playerAge = parseInt(age);
-            initializeMarkets();
-            saveGame();
-            registrationModal.classList.add('hidden');
-            checkLeagueUp();
-            updateDisplay();
+            html2canvas(receiptContent, { scale: 2 }).then(canvas => {
+                const imgData = canvas.toDataURL('image/png');
+                const pdf = new jsPDF('p', 'mm', 'a4');
+                const pdfWidth = pdf.internal.pageSize.getWidth();
+                const pdfHeight = pdf.internal.pageSize.getHeight();
+                pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+                pdf.save("UCC-Receipt.pdf");
+            });
         });
-         closeRankUpBtn.addEventListener('click', () => {
-            rankUpModal.classList.add('opacity-0', 'scale-95');
-            setTimeout(() => {
-                rankUpModal.classList.add('hidden');
-            }, 500);
-        });
-
-        // --- Game Loops & Save/Load ---
-        setInterval(applyPassiveIncome, 1000);
-        setInterval(regenerateEnergy, 1000);
-        setInterval(saveGame, 5000);
-
-        // --- Initial Setup ---
-        window.onload = () => {
-            generateLeagues();
-            const hasSave = loadGame();
-            if (!hasSave) {
-                registrationModal.classList.remove('hidden');
-            } else {
-                checkLeagueUp();
-                updateDisplay();
-                if(gameState.claimedInviteCode){
-                     referralSection.innerHTML = '<p class="text-green-400 text-center">Invite bonus claimed!</p>';
-                }
-            }
-        };
-        window.onbeforeunload = saveGame;
     </script>
+
 </body>
 </html>
